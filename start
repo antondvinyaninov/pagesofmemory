@@ -1,0 +1,156 @@
+#!/bin/bash
+
+set -e
+
+LARAVEL_PORT=8000
+VITE_PORT=5173
+LOG_DIR="logs"
+LARAVEL_LOG="$LOG_DIR/laravel.log"
+VITE_LOG="$LOG_DIR/vite.log"
+
+mkdir -p "$LOG_DIR"
+
+echo "🚀 Запуск Laravel проекта..."
+
+check_port() {
+    local port=$1
+    lsof -ti:$port >/dev/null 2>&1
+}
+
+kill_port() {
+    local port=$1
+    local name=$2
+    if check_port $port; then
+        echo "⚠️  Порт $port занят. Освобождаю..."
+        lsof -ti:$port | xargs kill -9 2>/dev/null || true
+        sleep 1
+        echo "✅ Порт $port освобожден"
+    fi
+}
+
+check_db() {
+    echo "🔍 Проверка подключения к базе данных..."
+    if php artisan db:show >/dev/null 2>&1; then
+        echo "✅ Подключение к PostgreSQL успешно"
+        return 0
+    else
+        echo "❌ Ошибка подключения к базе данных"
+        echo "Проверьте настройки в .env файле"
+        return 1
+    fi
+}
+
+case "${1:-start}" in
+    start)
+        kill_port $LARAVEL_PORT "Laravel"
+        kill_port $VITE_PORT "Vite"
+        
+        if ! check_db; then
+            exit 1
+        fi
+        
+        echo "🔧 Очистка кеша..."
+        php artisan optimize:clear >/dev/null 2>&1
+        
+        echo "📦 Установка зависимостей..."
+        if [ ! -d "node_modules" ]; then
+            npm install
+        fi
+        
+        echo "🚀 Запуск Laravel (порт $LARAVEL_PORT)..."
+        php artisan serve --port=$LARAVEL_PORT > "$LARAVEL_LOG" 2>&1 &
+        LARAVEL_PID=$!
+        echo $LARAVEL_PID > .laravel.pid
+        
+        echo "⚡ Запуск Vite (порт $VITE_PORT)..."
+        npm run dev > "$VITE_LOG" 2>&1 &
+        VITE_PID=$!
+        echo $VITE_PID > .vite.pid
+        
+        sleep 2
+        
+        if ps -p $LARAVEL_PID > /dev/null && ps -p $VITE_PID > /dev/null; then
+            echo ""
+            echo "✅ Проект успешно запущен!"
+            echo "📍 Laravel: http://localhost:$LARAVEL_PORT"
+            echo "⚡ Vite: http://localhost:$VITE_PORT"
+            echo ""
+            echo "📋 Логи:"
+            echo "   Laravel: tail -f $LARAVEL_LOG"
+            echo "   Vite: tail -f $VITE_LOG"
+            echo ""
+            echo "🛑 Остановка: ./start stop"
+        else
+            echo "❌ Ошибка запуска. Проверьте логи."
+            exit 1
+        fi
+        ;;
+        
+    stop)
+        echo "🛑 Остановка проекта..."
+        
+        if [ -f .laravel.pid ]; then
+            LARAVEL_PID=$(cat .laravel.pid)
+            if ps -p $LARAVEL_PID > /dev/null 2>&1; then
+                kill $LARAVEL_PID 2>/dev/null || true
+                echo "✅ Laravel остановлен"
+            fi
+            rm -f .laravel.pid
+        fi
+        
+        if [ -f .vite.pid ]; then
+            VITE_PID=$(cat .vite.pid)
+            if ps -p $VITE_PID > /dev/null 2>&1; then
+                kill $VITE_PID 2>/dev/null || true
+                echo "✅ Vite остановлен"
+            fi
+            rm -f .vite.pid
+        fi
+        
+        kill_port $LARAVEL_PORT "Laravel"
+        kill_port $VITE_PORT "Vite"
+        
+        echo "✅ Проект остановлен"
+        ;;
+        
+    restart)
+        $0 stop
+        sleep 2
+        $0 start
+        ;;
+        
+    status)
+        echo "📊 Статус проекта:"
+        echo ""
+        
+        if [ -f .laravel.pid ] && ps -p $(cat .laravel.pid) > /dev/null 2>&1; then
+            echo "✅ Laravel: запущен (PID: $(cat .laravel.pid))"
+            echo "   http://localhost:$LARAVEL_PORT"
+        else
+            echo "❌ Laravel: остановлен"
+        fi
+        
+        if [ -f .vite.pid ] && ps -p $(cat .vite.pid) > /dev/null 2>&1; then
+            echo "✅ Vite: запущен (PID: $(cat .vite.pid))"
+            echo "   http://localhost:$VITE_PORT"
+        else
+            echo "❌ Vite: остановлен"
+        fi
+        
+        echo ""
+        check_db
+        ;;
+        
+    logs)
+        if [ "$2" = "vite" ]; then
+            tail -f "$VITE_LOG"
+        else
+            tail -f "$LARAVEL_LOG"
+        fi
+        ;;
+        
+    *)
+        echo "Использование: ./start {start|stop|restart|status|logs [laravel|vite]}"
+        exit 1
+        ;;
+esac
