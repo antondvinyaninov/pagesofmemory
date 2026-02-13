@@ -39,7 +39,7 @@ class MemoryController extends Controller
 
         // Если это служебное сообщение из вкладки "Близкие люди" - не создаем воспоминание
         if ($validated['content'] === '[Связь установлена через вкладку Близкие люди]') {
-            return redirect()->route('memorial.show', ['id' => 'id' . $memorialId])
+            return redirect()->route('memorial.show', ['id' => $memorialId])
                 ->with('success', 'Связь успешно установлена');
         }
 
@@ -52,7 +52,117 @@ class MemoryController extends Controller
 
         // TODO: Обработка загрузки медиа файлов
 
-        return redirect()->route('memorial.show', ['id' => 'id' . $memorialId])
+        return redirect()->route('memorial.show', ['id' => $memorialId])
             ->with('success', 'Воспоминание успешно добавлено');
+    }
+    
+    public function like(Request $request, $id)
+    {
+        $memory = Memory::findOrFail($id);
+        $userId = auth()->id();
+        
+        // Проверяем, есть ли уже лайк от этого пользователя
+        $existingLike = \DB::table('memory_likes')
+            ->where('memory_id', $memory->id)
+            ->where('user_id', $userId)
+            ->first();
+        
+        if ($existingLike) {
+            // Удаляем лайк
+            \DB::table('memory_likes')
+                ->where('memory_id', $memory->id)
+                ->where('user_id', $userId)
+                ->delete();
+            
+            $memory->decrement('likes');
+            $liked = false;
+        } else {
+            // Добавляем лайк
+            \DB::table('memory_likes')->insert([
+                'memory_id' => $memory->id,
+                'user_id' => $userId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            $memory->increment('likes');
+            $liked = true;
+        }
+        
+        return response()->json([
+            'success' => true,
+            'likes' => $memory->likes,
+            'liked' => $liked
+        ]);
+    }
+    
+    public function comment(Request $request, $id)
+    {
+        $memory = Memory::findOrFail($id);
+        
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:1', 'max:500'],
+        ]);
+        
+        $comment = \App\Models\Comment::create([
+            'memory_id' => $memory->id,
+            'user_id' => auth()->id(),
+            'content' => $validated['content'],
+        ]);
+        
+        // Загружаем пользователя для ответа
+        $comment->load('user');
+        
+        return response()->json([
+            'success' => true,
+            'comment' => [
+                'id' => $comment->id,
+                'author_name' => $comment->user->name,
+                'author_avatar' => $comment->user->avatar ? \Storage::disk('s3')->url($comment->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&size=128&background=f3e5f5&color=7b1fa2&bold=true',
+                'content' => $comment->content,
+                'created_at' => $comment->created_at->toDateTimeString(),
+                'likes' => 0,
+            ]
+        ]);
+    }
+    
+    public function likeComment(Request $request, $id)
+    {
+        $comment = \App\Models\Comment::findOrFail($id);
+        $userId = auth()->id();
+        
+        // Проверяем, есть ли уже лайк от этого пользователя
+        $existingLike = \DB::table('comment_likes')
+            ->where('comment_id', $comment->id)
+            ->where('user_id', $userId)
+            ->first();
+        
+        if ($existingLike) {
+            // Удаляем лайк
+            \DB::table('comment_likes')
+                ->where('comment_id', $comment->id)
+                ->where('user_id', $userId)
+                ->delete();
+            
+            $comment->decrement('likes');
+            $liked = false;
+        } else {
+            // Добавляем лайк
+            \DB::table('comment_likes')->insert([
+                'comment_id' => $comment->id,
+                'user_id' => $userId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            $comment->increment('likes');
+            $liked = true;
+        }
+        
+        return response()->json([
+            'success' => true,
+            'likes' => $comment->likes,
+            'liked' => $liked
+        ]);
     }
 }

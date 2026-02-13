@@ -12,14 +12,17 @@ class UserController extends Controller
 {
     public function show($id)
     {
-        $user = User::with(['memorials' => function($query) use ($id) {
-            // Если смотрим свой профиль - показываем все мемориалы
-            if (auth()->check() && auth()->id() == $id) {
-                return $query;
-            }
-            // Для других пользователей - только опубликованные
-            return $query->where('status', 'published');
-        }])->findOrFail($id);
+        $user = User::with([
+            'memorials' => function($query) use ($id) {
+                // Если смотрим свой профиль - показываем все мемориалы
+                if (auth()->check() && auth()->id() == $id) {
+                    return $query;
+                }
+                // Для других пользователей - только опубликованные
+                return $query->where('status', 'published');
+            },
+            'memories.memorial' // Загружаем воспоминания пользователя с мемориалами
+        ])->findOrFail($id);
         
         // Проверка приватности профиля
         // TODO: добавить проверку настроек приватности

@@ -20,21 +20,31 @@
                     <select name="relationship_type" id="relationship_type_people" required class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
                         <option value="">Кем вам приходится {{ is_object($memorial) ? $memorial->first_name : 'этот человек' }}?</option>
                         <optgroup label="Семья">
-                            <option value="spouse">Супруг/Супруга</option>
-                            <option value="parent">Родитель</option>
-                            <option value="child">Ребенок (сын/дочь)</option>
-                            <option value="sibling">Брат/Сестра</option>
-                            <option value="grandparent">Дедушка/Бабушка</option>
-                            <option value="grandchild">Внук/Внучка</option>
-                            <option value="uncle_aunt">Дядя/Тетя</option>
-                            <option value="nephew_niece">Племянник/Племянница</option>
-                            <option value="cousin">Двоюродный брат/сестра</option>
+                            <option value="husband">Муж</option>
+                            <option value="wife">Жена</option>
+                            <option value="father">Отец</option>
+                            <option value="mother">Мать</option>
+                            <option value="son">Сын</option>
+                            <option value="daughter">Дочь</option>
+                            <option value="brother">Брат</option>
+                            <option value="sister">Сестра</option>
+                            <option value="grandfather">Дедушка</option>
+                            <option value="grandmother">Бабушка</option>
+                            <option value="grandson">Внук</option>
+                            <option value="granddaughter">Внучка</option>
+                            <option value="uncle">Дядя</option>
+                            <option value="aunt">Тетя</option>
+                            <option value="nephew">Племянник</option>
+                            <option value="niece">Племянница</option>
+                            <option value="relative">Родственник</option>
                         </optgroup>
                         <optgroup label="Другие связи">
-                            <option value="friend">Друг/Подруга</option>
+                            <option value="friend_male">Друг</option>
+                            <option value="friend_female">Подруга</option>
                             <option value="colleague">Коллега</option>
-                            <option value="neighbor">Сосед/Соседка</option>
-                            <option value="classmate">Одноклассник/Однокурсник</option>
+                            <option value="neighbor">Сосед</option>
+                            <option value="classmate">Одноклассник</option>
+                            <option value="coursemate">Однокурсник</option>
                             <option value="other">Другое</option>
                         </optgroup>
                         <option value="not_specified">Не хочу указывать</option>

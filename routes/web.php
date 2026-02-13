@@ -16,6 +16,9 @@ Route::put('/memorial/{id}', [MemorialController::class, 'update'])->middleware(
 
 // Memory routes
 Route::post('/memorial/{id}/memory', [App\Http\Controllers\MemoryController::class, 'store'])->middleware('auth')->name('memory.store');
+Route::post('/memory/{id}/like', [App\Http\Controllers\MemoryController::class, 'like'])->middleware('auth')->name('memory.like');
+Route::post('/memory/{id}/comment', [App\Http\Controllers\MemoryController::class, 'comment'])->middleware('auth')->name('memory.comment');
+Route::post('/comment/{id}/like', [App\Http\Controllers\MemoryController::class, 'likeComment'])->middleware('auth')->name('comment.like');
 
 // Auth routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

@@ -181,21 +181,68 @@ class MemorialController extends Controller
             }
             
             // Получаем воспоминания с информацией о связи автора
-            $memories = $memorial->memories->map(function($memory) {
+            $userId = auth()->id();
+            
+            $memories = $memorial->memories->map(function($memory) use ($userId) {
                 $relationship = \App\Models\Relationship::where('memorial_id', $memory->memorial_id)
                     ->where('user_id', $memory->user_id)
                     ->first();
                 
+                // Проверяем, лайкнул ли текущий пользователь это воспоминание
+                $userLiked = $userId ? \DB::table('memory_likes')
+                    ->where('memory_id', $memory->id)
+                    ->where('user_id', $userId)
+                    ->exists() : false;
+                
+                // Загружаем комментарии
+                $comments = $memory->comments()->with('user')->orderBy('created_at', 'desc')->get()->map(function($comment) use ($userId) {
+                    // Проверяем, лайкнул ли текущий пользователь этот комментарий
+                    $commentLiked = $userId ? \DB::table('comment_likes')
+                        ->where('comment_id', $comment->id)
+                        ->where('user_id', $userId)
+                        ->exists() : false;
+                    
+                    return [
+                        'id' => $comment->id,
+                        'author_name' => $comment->user->name,
+                        'author_avatar' => $comment->user->avatar ? \Storage::disk('s3')->url($comment->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&size=128&background=f3e5f5&color=7b1fa2&bold=true',
+                        'content' => $comment->content,
+                        'created_at' => $comment->created_at->toDateTimeString(),
+                        'likes' => $comment->likes ?? 0,
+                        'user_liked' => $commentLiked,
+                    ];
+                })->toArray();
+                
+                // Проверяем, есть ли у пользователя комментарий к этому воспоминанию
+                $userHasComment = $userId ? $memory->comments()->where('user_id', $userId)->exists() : false;
+                
                 return [
                     'id' => $memory->id,
                     'author_name' => $memory->user->name,
-                    'author_avatar' => $memory->user->avatar ? \Storage::disk('s3')->url($memory->user->avatar) : 'https://via.placeholder.com/48',
+                    'author_avatar' => $memory->user->avatar ? \Storage::disk('s3')->url($memory->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($memory->user->name) . '&size=128&background=e3f2fd&color=1976d2&bold=true',
                     'author_relationship' => $relationship ? $this->getRelationshipLabel($relationship) : null,
                     'content' => $memory->content,
-                    'photo_url' => null, // TODO: обработка медиа
+                    'photos' => $memory->media && is_array($memory->media) 
+                        ? array_filter(array_map(function($item) {
+                            if (is_array($item) && isset($item['type']) && $item['type'] === 'image' && isset($item['url'])) {
+                                return $item['url'];
+                            }
+                            return null;
+                        }, $memory->media))
+                        : [],
+                    'videos' => $memory->media && is_array($memory->media) 
+                        ? array_filter(array_map(function($item) {
+                            if (is_array($item) && isset($item['type']) && $item['type'] === 'video' && isset($item['url'])) {
+                                return $item['url'];
+                            }
+                            return null;
+                        }, $memory->media))
+                        : [],
                     'created_at' => $memory->created_at->toDateTimeString(),
                     'likes' => $memory->likes,
-                    'comments' => 0, // TODO: комментарии
+                    'user_liked' => $userLiked,
+                    'user_has_comment' => $userHasComment,
+                    'comments' => $comments,
                     'views' => $memory->views,
                 ];
             })->toArray();
@@ -206,9 +253,33 @@ class MemorialController extends Controller
                     ->where('user_id', auth()->id())
                     ->first()
                 : null;
+            
+            // Собираем все медиа из воспоминаний
+            $allPhotos = [];
+            $allVideos = [];
+            foreach ($memories as $memory) {
+                if (isset($memory['photos']) && is_array($memory['photos'])) {
+                    foreach ($memory['photos'] as $photo) {
+                        $allPhotos[] = [
+                            'url' => $photo,
+                            'memory_id' => $memory['id'],
+                            'author' => $memory['author_name'],
+                        ];
+                    }
+                }
+                if (isset($memory['videos']) && is_array($memory['videos'])) {
+                    foreach ($memory['videos'] as $video) {
+                        $allVideos[] = [
+                            'url' => $video,
+                            'memory_id' => $memory['id'],
+                            'author' => $memory['author_name'],
+                        ];
+                    }
+                }
+            }
         }
 
-        return view('memorial.show.show', compact('memorial', 'memories', 'userRelationship'));
+        return view('memorial.show.show', compact('memorial', 'memories', 'userRelationship', 'allPhotos', 'allVideos'));
     }
     
     private function getRelationshipLabel($relationship)
@@ -223,19 +294,29 @@ class MemorialController extends Controller
         }
         
         $labels = [
-            'spouse' => 'Супруг/Супруга',
-            'parent' => 'Родитель',
-            'child' => 'Ребенок',
-            'sibling' => 'Брат/Сестра',
-            'grandparent' => 'Дедушка/Бабушка',
-            'grandchild' => 'Внук/Внучка',
-            'uncle_aunt' => 'Дядя/Тетя',
-            'nephew_niece' => 'Племянник/Племянница',
-            'cousin' => 'Двоюродный брат/сестра',
-            'friend' => 'Друг',
+            'husband' => 'Муж',
+            'wife' => 'Жена',
+            'father' => 'Отец',
+            'mother' => 'Мать',
+            'son' => 'Сын',
+            'daughter' => 'Дочь',
+            'brother' => 'Брат',
+            'sister' => 'Сестра',
+            'grandfather' => 'Дедушка',
+            'grandmother' => 'Бабушка',
+            'grandson' => 'Внук',
+            'granddaughter' => 'Внучка',
+            'uncle' => 'Дядя',
+            'aunt' => 'Тетя',
+            'nephew' => 'Племянник',
+            'niece' => 'Племянница',
+            'relative' => 'Родственник',
+            'friend_male' => 'Друг',
+            'friend_female' => 'Подруга',
             'colleague' => 'Коллега',
             'neighbor' => 'Сосед',
             'classmate' => 'Одноклассник',
+            'coursemate' => 'Однокурсник',
         ];
         
         return $labels[$relationship->relationship_type] ?? $relationship->relationship_type;

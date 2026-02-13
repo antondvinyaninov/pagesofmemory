@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasMany(Memorial::class);
     }
 
+    public function memories()
+    {
+        return $this->hasMany(Memory::class);
+    }
+
     public function relationships()
     {
         return $this->hasMany(Relationship::class);

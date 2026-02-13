@@ -40,7 +40,7 @@
                     <h5 class="font-semibold text-slate-700 mb-2">Родился</h5>
                     <p class="text-gray-600">{{ $memorial->birth_date->format('d.m.Y') }}</p>
                     @if($memorial->birth_place)
-                    <p class="text-sm text-gray-500 mt-1">{{ $memorial->birth_place }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ expand_region_abbreviations($memorial->birth_place) }}</p>
                     @endif
                 </div>
                 @endif

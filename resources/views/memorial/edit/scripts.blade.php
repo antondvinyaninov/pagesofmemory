@@ -165,6 +165,27 @@ function militaryFilesList() {
     }
 }
 
+// Функция для замены сокращений в названиях регионов
+function expandRegionAbbreviations(text) {
+    if (!text) return text;
+    
+    const replacements = {
+        ' Респ': ' Республика',
+        ' обл': ' область',
+        ' край': ' край',
+        ' АО': ' автономный округ',
+        ' Аобл': ' автономная область',
+        ' г': ' город'
+    };
+    
+    let result = text;
+    for (const [abbr, full] of Object.entries(replacements)) {
+        result = result.replace(new RegExp(abbr + '(?![а-яА-Я])', 'g'), full);
+    }
+    
+    return result;
+}
+
 function birthPlaceAutocomplete() {
     return {
         suggestions: [],
@@ -224,7 +245,7 @@ function birthPlaceAutocomplete() {
             console.log('selectCity вызван, suggestion:', suggestion);
             const city = suggestion.data.city || suggestion.data.settlement;
             const region = suggestion.data.region_with_type;
-            const fullAddress = `${city}, ${region}`;
+            const fullAddress = expandRegionAbbreviations(`${city}, ${region}`);
             
             console.log('Формируем адрес:', fullAddress);
             document.getElementById('birth_place_input').value = fullAddress;
@@ -368,9 +389,10 @@ function burialCityAutocomplete() {
         selectCity(suggestion) {
             const city = suggestion.data.city || suggestion.data.settlement;
             const region = suggestion.data.region_with_type;
+            const fullAddress = expandRegionAbbreviations(`${city}, ${region}`);
             
-            document.getElementById('burial_city_input').value = `${city}, ${region}`;
-            this.selectedCity = `${city}, ${region}`;
+            document.getElementById('burial_city_input').value = fullAddress;
+            this.selectedCity = fullAddress;
             this.showSuggestions = false;
         }
     }

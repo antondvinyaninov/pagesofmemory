@@ -3,7 +3,7 @@
 @section('title', $memorial->exists ? 'Редактировать мемориал' : 'Создать мемориал')
 
 @section('content')
-<div class="bg-gray-200 min-h-screen py-6" x-data="{ activeTab: 'basic' }">
+<div class="bg-gray-50 min-h-screen py-6" x-data="{ activeTab: 'basic' }">
     <div class="container mx-auto px-4">
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- Основной контент -->

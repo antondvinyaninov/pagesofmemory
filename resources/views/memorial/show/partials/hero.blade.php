@@ -33,7 +33,7 @@
                     <!-- Фото -->
                     <div class="w-60 h-60 md:w-64 md:h-64 bg-gray-300 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
                         <img 
-                            src="{{ $memorial->photo ? Storage::url($memorial->photo) : 'https://via.placeholder.com/300' }}" 
+                            src="{{ $memorial->photo ? Storage::url($memorial->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($memorial->first_name . ' ' . $memorial->last_name) . '&size=300&background=e5e7eb&color=6b7280&bold=true' }}" 
                             alt="{{ $memorial->first_name }} {{ $memorial->last_name }}"
                             class="w-full h-full object-cover"
                         />
@@ -61,7 +61,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="text-base md:text-lg lg:text-xl opacity-90">{{ $memorial->birth_place }}</span>
+                            <span class="text-base md:text-lg lg:text-xl opacity-90">{{ expand_region_abbreviations($memorial->birth_place) }}</span>
                         </div>
                         @endif
                         
