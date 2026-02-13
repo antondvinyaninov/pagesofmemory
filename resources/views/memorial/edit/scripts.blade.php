@@ -629,3 +629,82 @@ function burialCityAutocomplete() {
         });
     }
 </script>
+
+<script>
+function biographyEditor() {
+    return {
+        editor: null,
+        editorFullscreen: null,
+        isFullscreen: false,
+        
+        init() {
+            // Ждем загрузки Quill
+            if (typeof Quill === 'undefined') {
+                setTimeout(() => this.init(), 100);
+                return;
+            }
+            
+            this.editor = new Quill('#biography-editor', {
+                theme: 'snow',
+                placeholder: 'Расскажите о жизни человека, его достижениях, характере, увлечениях...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['clean']
+                    ]
+                }
+            });
+            
+            // Загружаем существующий контент
+            const content = this.$refs.textarea.value;
+            if (content) {
+                this.editor.root.innerHTML = content;
+            }
+            
+            // Синхронизируем с textarea при изменении
+            this.editor.on('text-change', () => {
+                this.$refs.textarea.value = this.editor.root.innerHTML;
+            });
+        },
+        
+        toggleFullscreen() {
+            this.isFullscreen = !this.isFullscreen;
+            
+            if (this.isFullscreen) {
+                // Создаем fullscreen редактор
+                this.$nextTick(() => {
+                    this.editorFullscreen = new Quill('#biography-editor-fullscreen', {
+                        theme: 'snow',
+                        placeholder: 'Расскажите о жизни человека, его достижениях, характере, увлечениях...',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['clean']
+                            ]
+                        }
+                    });
+                    
+                    // Копируем контент из основного редактора
+                    this.editorFullscreen.root.innerHTML = this.editor.root.innerHTML;
+                    
+                    // Синхронизируем изменения
+                    this.editorFullscreen.on('text-change', () => {
+                        this.editor.root.innerHTML = this.editorFullscreen.root.innerHTML;
+                        this.$refs.textarea.value = this.editorFullscreen.root.innerHTML;
+                    });
+                });
+            } else {
+                // Копируем контент обратно при закрытии
+                if (this.editorFullscreen) {
+                    this.editor.root.innerHTML = this.editorFullscreen.root.innerHTML;
+                    this.$refs.textarea.value = this.editor.root.innerHTML;
+                }
+            }
+        }
+    }
+}
+</script>
