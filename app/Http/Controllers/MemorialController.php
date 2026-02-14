@@ -175,7 +175,7 @@ class MemorialController extends Controller
                 }
             }
             
-            // Увеличиваем счетчик просмотров (не для владельца)
+            // Увеличиваем счетчик просмотров мемориала (не для владельца)
             if (!auth()->check() || $memorial->user_id !== auth()->id()) {
                 $memorial->increment('views');
             }
@@ -183,24 +183,55 @@ class MemorialController extends Controller
             // Получаем воспоминания с информацией о связи автора
             $userId = auth()->id();
             
-            $memories = $memorial->memories->map(function($memory) use ($userId) {
-                $relationship = \App\Models\Relationship::where('memorial_id', $memory->memorial_id)
-                    ->where('user_id', $memory->user_id)
-                    ->first();
+            // Предзагружаем все связи для авторов воспоминаний
+            $memoryUserIds = $memorial->memories->pluck('user_id')->unique();
+            $relationships = \App\Models\Relationship::where('memorial_id', $memorial->id)
+                ->whereIn('user_id', $memoryUserIds)
+                ->get()
+                ->keyBy('user_id');
+            
+            // Предзагружаем лайки пользователя
+            $memoryIds = $memorial->memories->pluck('id');
+            $userMemoryLikes = $userId ? \DB::table('memory_likes')
+                ->where('user_id', $userId)
+                ->whereIn('memory_id', $memoryIds)
+                ->pluck('memory_id')
+                ->flip()
+                ->toArray() : [];
+            
+            // Предзагружаем комментарии с пользователями
+            $allComments = \App\Models\Comment::with('user')
+                ->whereIn('memory_id', $memoryIds)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->groupBy('memory_id');
+            
+            // Предзагружаем лайки комментариев пользователя
+            $commentIds = $allComments->flatten()->pluck('id');
+            $userCommentLikes = $userId && $commentIds->isNotEmpty() ? \DB::table('comment_likes')
+                ->where('user_id', $userId)
+                ->whereIn('comment_id', $commentIds)
+                ->pluck('comment_id')
+                ->flip()
+                ->toArray() : [];
+            
+            // Предзагружаем информацию о комментариях пользователя
+            $userCommentMemories = $userId && $commentIds->isNotEmpty() ? \App\Models\Comment::where('user_id', $userId)
+                ->whereIn('memory_id', $memoryIds)
+                ->pluck('memory_id')
+                ->flip()
+                ->toArray() : [];
+            
+            $memories = $memorial->memories->map(function($memory) use ($userId, $relationships, $userMemoryLikes, $allComments, $userCommentLikes, $userCommentMemories) {
+                $relationship = $relationships->get($memory->user_id);
                 
                 // Проверяем, лайкнул ли текущий пользователь это воспоминание
-                $userLiked = $userId ? \DB::table('memory_likes')
-                    ->where('memory_id', $memory->id)
-                    ->where('user_id', $userId)
-                    ->exists() : false;
+                $userLiked = isset($userMemoryLikes[$memory->id]);
                 
                 // Загружаем комментарии
-                $comments = $memory->comments()->with('user')->orderBy('created_at', 'desc')->get()->map(function($comment) use ($userId) {
-                    // Проверяем, лайкнул ли текущий пользователь этот комментарий
-                    $commentLiked = $userId ? \DB::table('comment_likes')
-                        ->where('comment_id', $comment->id)
-                        ->where('user_id', $userId)
-                        ->exists() : false;
+                $memoryComments = $allComments->get($memory->id, collect());
+                $comments = $memoryComments->map(function($comment) use ($userCommentLikes) {
+                    $commentLiked = isset($userCommentLikes[$comment->id]);
                     
                     return [
                         'id' => $comment->id,
@@ -214,7 +245,7 @@ class MemorialController extends Controller
                 })->toArray();
                 
                 // Проверяем, есть ли у пользователя комментарий к этому воспоминанию
-                $userHasComment = $userId ? $memory->comments()->where('user_id', $userId)->exists() : false;
+                $userHasComment = isset($userCommentMemories[$memory->id]);
                 
                 return [
                     'id' => $memory->id,

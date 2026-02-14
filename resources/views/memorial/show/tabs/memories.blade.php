@@ -1,16 +1,17 @@
 <!-- Форма добавления воспоминания -->
 @auth
 <div class="bg-white rounded-xl shadow-md overflow-hidden mb-4">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
-        <h3 class="text-lg font-semibold text-slate-700 flex items-center gap-2">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Поделитесь воспоминаниями
+    <div class="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-700 flex items-center gap-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="hidden sm:inline">Поделитесь воспоминаниями</span>
+            <span class="sm:hidden">Добавить воспоминание</span>
         </h3>
         
         <!-- Поле выбора связи (только если связи еще нет) -->
         @if(!$userRelationship)
-        <div class="flex-shrink-0">
-            <select name="relationship_type" id="relationship_type" form="memory-form" required class="px-4 py-2 text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-blue-100">
+        <div class="w-full sm:w-auto flex-shrink-0">
+            <select name="relationship_type" id="relationship_type" form="memory-form" required class="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-blue-100">
                 <option value="">Кем вам приходится {{ is_object($memorial) ? $memorial->first_name : 'этот человек' }}?</option>
                 <optgroup label="Семья">
                     <option value="husband">Муж</option>
@@ -46,7 +47,7 @@
         @endif
     </div>
     
-    <form id="memory-form" action="{{ route('memory.store', ['id' => is_object($memorial) && isset($memorial->id) ? str_replace('id', '', $memorial->id) : 1]) }}" method="POST" enctype="multipart/form-data" class="p-6">
+    <form id="memory-form" action="{{ route('memory.store', ['id' => is_object($memorial) && isset($memorial->id) ? str_replace('id', '', $memorial->id) : 1]) }}" method="POST" enctype="multipart/form-data" class="p-4 sm:p-6">
         @csrf
         
         <!-- Поле для "Другое" -->
@@ -57,7 +58,7 @@
                     type="text" 
                     name="relationship_custom" 
                     placeholder="Укажите вашу связь"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    class="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
             </div>
         </div>
@@ -67,18 +68,19 @@
             name="content"
             required
             placeholder="Напишите ваше воспоминание..."
-            class="w-full p-4 border border-gray-300 rounded-lg resize-vertical min-h-[120px] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-colors"
+            class="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-lg resize-vertical min-h-[100px] sm:min-h-[120px] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-colors"
         ></textarea>
         
-        <div class="flex justify-between items-center mt-4">
-            <label class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                Добавить фото/видео
+        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-4">
+            <label class="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-sm">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="hidden sm:inline">Добавить фото/видео</span>
+                <span class="sm:hidden">Фото/видео</span>
                 <input type="file" name="media[]" multiple accept="image/*,video/*" class="hidden">
             </label>
             
-            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 Опубликовать
             </button>
         </div>
@@ -87,26 +89,27 @@
 @else
 <!-- Блок для неавторизованных пользователей -->
 <div class="bg-white rounded-xl shadow-md overflow-hidden mb-4">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-slate-700 flex items-center gap-2">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Поделитесь воспоминаниями
+    <div class="px-4 sm:px-6 py-4 border-b border-gray-100">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-700 flex items-center gap-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="hidden sm:inline">Поделитесь воспоминаниями</span>
+            <span class="sm:hidden">Добавить воспоминание</span>
         </h3>
     </div>
     
-    <div class="p-6 text-center">
+    <div class="p-4 sm:p-6 text-center">
         <div class="mb-4">
-            <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            <h4 class="text-lg font-medium text-slate-700 mb-2">
+            <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <h4 class="text-base sm:text-lg font-medium text-slate-700 mb-2">
                 Войдите, чтобы оставить воспоминание
             </h4>
-            <p class="text-gray-500 mb-4">
+            <p class="text-sm sm:text-base text-gray-500 mb-4">
                 Поделитесь своими воспоминаниями об этом человеке. Войдите в систему или зарегистрируйтесь.
             </p>
         </div>
         
         <div class="flex justify-center">
-            <a href="{{ route('login') }}" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <a href="{{ route('login') }}" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
                 Вход
             </a>
         </div>
@@ -117,24 +120,24 @@
 <!-- Список воспоминаний -->
 <div class="space-y-3">
     @foreach($memories as $memory)
-    <div x-data="{ showComments: false }" class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+    <div x-data="{ showComments: false }" data-memory-id="{{ $memory['id'] }}" class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
         <!-- Заголовок воспоминания -->
-        <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between px-3 sm:px-4 py-3">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 <a href="{{ route('user.show', ['id' => 'id1']) }}" class="flex-shrink-0">
                     <img 
                         src="{{ $memory['author_avatar'] }}" 
                         alt="{{ $memory['author_name'] }}"
-                        class="w-16 h-16 rounded-lg object-cover hover:opacity-80 transition-opacity cursor-pointer"
+                        class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover hover:opacity-80 transition-opacity cursor-pointer"
                     />
                 </a>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('user.show', ['id' => 'id1']) }}" class="hover:underline">
-                            <h4 class="font-semibold text-slate-700 text-base">{{ $memory['author_name'] }}</h4>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+                        <a href="{{ route('user.show', ['id' => 'id1']) }}" class="hover:underline min-w-0">
+                            <h4 class="font-semibold text-slate-700 text-sm sm:text-base truncate">{{ $memory['author_name'] }}</h4>
                         </a>
                         @if(isset($memory['author_relationship']))
-                            <span class="text-sm text-blue-600 font-medium">• {{ $memory['author_relationship'] }}</span>
+                            <span class="text-xs sm:text-sm text-blue-600 font-medium whitespace-nowrap">• {{ $memory['author_relationship'] }}</span>
                         @endif
                     </div>
                     <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($memory['created_at'])->locale('ru')->isoFormat('D MMMM YYYY в HH:mm') }}</p>
@@ -143,33 +146,66 @@
         </div>
 
         <!-- Контент воспоминания -->
-        <div class="px-4 pb-3">
+        <div class="px-3 sm:px-4 pb-3">
             <p class="text-slate-700 text-sm leading-relaxed">{{ $memory['content'] }}</p>
         </div>
 
         <!-- Фото воспоминания -->
         @if(isset($memory['photos']) && is_array($memory['photos']) && count($memory['photos']) > 0)
-        <div class="px-4 pb-3">
-            <div class="grid grid-cols-2 gap-2">
-                @foreach($memory['photos'] as $photo)
-                <div class="relative group cursor-pointer" onclick="openPhotoModal('{{ $photo }}')">
+        <div class="px-3 sm:px-4 pb-3">
+            @php
+                $photoCount = count($memory['photos']);
+            @endphp
+            
+            @if($photoCount === 1)
+                <!-- 1 фото - на всю ширину на мобильном, 50% на десктопе -->
+                <div class="relative group cursor-pointer sm:max-w-md" onclick="openPhotoModal('{{ $memory['photos'][0] }}')">
                     <div class="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
                         <img 
-                            src="{{ $photo }}" 
+                            src="{{ $memory['photos'][0] }}" 
                             alt="Фото воспоминания"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                     </div>
                 </div>
-                @endforeach
-            </div>
+            @elseif($photoCount === 2)
+                <!-- 2 фото - вертикально на мобильном, горизонтально на десктопе -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+                    @foreach($memory['photos'] as $photo)
+                    <div class="relative group cursor-pointer" onclick="openPhotoModal('{{ $photo }}')">
+                        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+                            <img 
+                                src="{{ $photo }}" 
+                                alt="Фото воспоминания"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            @else
+                <!-- 3+ фото - сетка 2 колонки -->
+                <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
+                    @foreach($memory['photos'] as $photo)
+                    <div class="relative group cursor-pointer" onclick="openPhotoModal('{{ $photo }}')">
+                        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+                            <img 
+                                src="{{ $photo }}" 
+                                alt="Фото воспоминания"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
         @endif
 
         <!-- Видео воспоминания -->
         @if(isset($memory['videos']) && is_array($memory['videos']) && count($memory['videos']) > 0)
-        <div class="px-4 pb-3">
-            <div class="grid grid-cols-2 gap-2">
+        <div class="px-3 sm:px-4 pb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 @foreach($memory['videos'] as $video)
                 <div class="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-900">
                     <video 
@@ -179,8 +215,8 @@
                         class="w-full h-full object-cover"
                     ></video>
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white/90 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                             </svg>
                         </div>
@@ -192,9 +228,9 @@
         @endif
 
         <!-- Действия -->
-        <div class="px-4 py-2 border-t border-gray-100 bg-gray-50">
+        <div class="px-3 sm:px-4 py-2 border-t border-gray-100 bg-gray-50">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 sm:gap-4">
                     @auth
                     <button onclick="likeMemory({{ $memory['id'] }}, this)" class="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors text-sm">
                         @php
@@ -234,16 +270,16 @@
         </div>
 
         <!-- Комментарии -->
-        <div x-show="showComments" class="border-t border-gray-100 px-4 py-3 bg-gray-50">
+        <div x-show="showComments" class="border-t border-gray-100 px-3 sm:px-4 py-3 bg-gray-50">
             <!-- Форма добавления комментария -->
             @auth
-            <div class="flex gap-3 pb-3 border-b border-gray-200 mb-3">
+            <div class="flex gap-2 sm:gap-3 pb-3 border-b border-gray-200 mb-3">
                 <img 
                     src="{{ auth()->user()->avatar ? \Storage::disk('s3')->url(auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&size=128&background=e3f2fd&color=1976d2&bold=true' }}" 
                     alt="{{ auth()->user()->name }}"
-                    class="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-md object-cover flex-shrink-0"
                 />
-                <form onsubmit="submitComment({{ $memory['id'] }}, this); return false;" class="flex-1 flex gap-2">
+                <form onsubmit="submitComment({{ $memory['id'] }}, this); return false;" class="flex-1 flex flex-col sm:flex-row gap-2">
                     <input 
                         type="text" 
                         placeholder="Написать комментарий..."
@@ -251,7 +287,7 @@
                     />
                     <button 
                         type="submit"
-                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-colors"
+                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-colors whitespace-nowrap"
                     >
                         Отправить
                     </button>
@@ -259,7 +295,7 @@
             </div>
             @endauth
             
-            <div class="space-y-3">
+            <div class="space-y-2 sm:space-y-3">
                 @if(is_array($memory['comments']) && count($memory['comments']) > 0)
                 @foreach($memory['comments'] as $comment)
             <div class="flex gap-3">

@@ -165,4 +165,18 @@ class MemoryController extends Controller
             'liked' => $liked
         ]);
     }
+    
+    public function view(Request $request, $id)
+    {
+        $memory = Memory::findOrFail($id);
+        
+        // Увеличиваем счетчик просмотров
+        // Можно добавить проверку, чтобы не считать просмотры от автора
+        $memory->increment('views');
+        
+        return response()->json([
+            'success' => true,
+            'views' => $memory->views
+        ]);
+    }
 }

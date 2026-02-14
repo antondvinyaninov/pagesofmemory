@@ -1,28 +1,28 @@
 <div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-slate-700 flex items-center gap-2">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+    <div class="px-4 sm:px-6 py-4 border-b border-gray-100">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-700 flex items-center gap-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
             О человеке
         </h3>
     </div>
     
-    <div class="p-6 space-y-8">
+    <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
         <!-- Памятные слова (некролог) -->
         @if($memorial->necrologue)
         <div>
-            <h4 class="text-xl font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <h4 class="text-lg sm:text-xl font-semibold text-slate-700 mb-3 sm:mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 Памятные слова
             </h4>
-            <div class="bg-gray-50 rounded-lg p-6">
-                <h2 class="text-2xl font-bold text-slate-700 mb-4">
+            <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-700 mb-3 sm:mb-4">
                     {{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}
                 </h2>
-                <p class="text-lg text-gray-600 mb-6">
+                <p class="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">
                     {{ $memorial->birth_date->format('d.m.Y') }} — {{ $memorial->death_date->format('d.m.Y') }}
                 </p>
                 <div class="prose max-w-none text-slate-700 leading-relaxed">
-                    <p class="italic text-lg">
+                    <p class="italic text-base sm:text-lg">
                         {{ $memorial->necrologue }}
                     </p>
                 </div>
@@ -33,8 +33,8 @@
         <!-- Основные факты -->
         @if($memorial->birth_date || $memorial->education || $memorial->career)
         <div>
-            <h4 class="text-xl font-semibold text-slate-700 mb-4">Основные факты</h4>
-            <div class="grid md:grid-cols-3 gap-6">
+            <h4 class="text-lg sm:text-xl font-semibold text-slate-700 mb-3 sm:mb-4">Основные факты</h4>
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 @if($memorial->birth_date)
                 <div class="bg-gray-50 rounded-lg p-4">
                     <h5 class="font-semibold text-slate-700 mb-2">Родился</h5>
@@ -71,8 +71,8 @@
         <!-- История жизни -->
         @if($memorial->full_biography)
         <div>
-            <h4 class="text-xl font-semibold text-slate-700 mb-4">История жизни</h4>
-            <div class="prose max-w-none text-slate-700 leading-relaxed space-y-4">
+            <h4 class="text-lg sm:text-xl font-semibold text-slate-700 mb-3 sm:mb-4">История жизни</h4>
+            <div class="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed space-y-3 sm:space-y-4">
                 <p>{{ $memorial->full_biography }}</p>
             </div>
         </div>
@@ -81,8 +81,8 @@
         <!-- Характер и увлечения -->
         @if($memorial->hobbies || $memorial->character_traits)
         <div>
-            <h4 class="text-xl font-semibold text-slate-700 mb-4">Характер и увлечения</h4>
-            <div class="grid md:grid-cols-2 gap-6">
+            <h4 class="text-lg sm:text-xl font-semibold text-slate-700 mb-3 sm:mb-4">Характер и увлечения</h4>
+            <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">
                 @if($memorial->hobbies)
                 <div class="space-y-3">
                     <h5 class="font-semibold text-slate-700">Увлечения</h5>
