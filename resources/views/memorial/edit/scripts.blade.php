@@ -933,8 +933,8 @@ function mediaVideos() {
                 return;
             }
 
-            if (file.size > 100 * 1024 * 1024) {
-                alert('Файл слишком большой. Максимальный размер: 100MB');
+            if (file.size > 500 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер: 500MB');
                 this.removeVideo(index);
                 return;
             }

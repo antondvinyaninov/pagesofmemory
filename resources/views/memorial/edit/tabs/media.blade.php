@@ -123,6 +123,6 @@
                                     </template>
                                 </div>
                                 
-                                <p class="mt-3 text-xs text-gray-500">MP4, MOV, AVI до 100MB каждое. Максимум 2 видео</p>
+                                <p class="mt-3 text-xs text-gray-500">MP4, MOV, AVI до 500MB каждое. Максимум 2 видео</p>
                             </div>
                         </div>
