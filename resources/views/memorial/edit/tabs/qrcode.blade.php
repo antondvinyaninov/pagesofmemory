@@ -264,23 +264,22 @@
                                 const border = 4;
                                 const moduleSize = size / (qr.size + border * 2);
                                 
-                                let svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ${size} ${size}" stroke="none">
-<rect width="100%" height="100%" fill="#ffffff"/>
-<path d="`;
+                                let svg = '<?xml version="1.0" encoding="UTF-8"?>' +
+'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + size + ' ' + size + '" stroke="none">' +
+'<rect width="100%" height="100%" fill="#ffffff"/>' +
+'<path d="';
                                 
                                 for (let y = 0; y < qr.size; y++) {
                                     for (let x = 0; x < qr.size; x++) {
                                         if (qr.getModule(x, y)) {
                                             const px = (x + border) * moduleSize;
                                             const py = (y + border) * moduleSize;
-                                            svg += `M${px},${py}h${moduleSize}v${moduleSize}h-${moduleSize}z `;
+                                            svg += 'M' + px + ',' + py + 'h' + moduleSize + 'v' + moduleSize + 'h-' + moduleSize + 'z ';
                                         }
                                     }
                                 }
                                 
-                                svg += `" fill="#000000"/>
-</svg>`;
+                                svg += '" fill="#000000"/></svg>';
                                 return svg;
                             }
 
