@@ -19,6 +19,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
+# Configure PHP for large uploads
+RUN echo "upload_max_filesize = 500M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size = 500M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_execution_time = 900" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_input_time = 900" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -44,7 +51,10 @@ RUN mkdir -p /var/www/public/build && \
     chown -R www-data:www-data /var/www/public/build
 
 # Configure Nginx
-RUN echo 'server {\n\
+RUN echo 'client_max_body_size 500M;\n\
+client_body_timeout 900s;\n\
+\n\
+server {\n\
     listen 80;\n\
     server_name _;\n\
     root /var/www/public;\n\
@@ -57,6 +67,7 @@ RUN echo 'server {\n\
         fastcgi_index index.php;\n\
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n\
         include fastcgi_params;\n\
+        fastcgi_read_timeout 900s;\n\
     }\n\
 }' > /etc/nginx/sites-available/default
 
