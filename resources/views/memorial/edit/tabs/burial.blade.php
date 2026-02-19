@@ -101,13 +101,30 @@
                                     
                                     <div id="burial-map" class="w-full h-96 rounded-lg border-2 border-blue-200 bg-white"></div>
                                     
-                                    <button 
-                                        type="button"
-                                        @click="hideMap()"
-                                        class="mt-3 px-4 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
-                                    >
-                                        Скрыть карту
-                                    </button>
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <button 
+                                            type="button"
+                                            @click="saveCoordinates()"
+                                            class="px-6 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Сохранить координаты
+                                        </button>
+                                        
+                                        <button 
+                                            type="button"
+                                            @click="hideMap()"
+                                            class="px-4 py-2.5 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
+                                        >
+                                            Скрыть карту
+                                        </button>
+                                        
+                                        <div x-show="coordinatesSaved" x-transition class="text-sm text-green-600 font-medium">
+                                            ✓ Координаты сохранены
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <!-- Скрытые поля для координат -->

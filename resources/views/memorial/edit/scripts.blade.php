@@ -483,6 +483,7 @@ function burialCityAutocomplete() {
         return {
             mapVisible: false,
             mapInitialized: false,
+            coordinatesSaved: false,
             latitude: parseFloat('{{ old('burial_latitude', $memorial->burial_latitude ?? 55.751244) }}'),
             longitude: parseFloat('{{ old('burial_longitude', $memorial->burial_longitude ?? 37.618423) }}'),
             
@@ -507,6 +508,17 @@ function burialCityAutocomplete() {
             
             hideMap() {
                 this.mapVisible = false;
+            },
+            
+            saveCoordinates() {
+                console.log('Сохранение координат:', this.latitude, this.longitude);
+                document.getElementById('burial_latitude').value = this.latitude;
+                document.getElementById('burial_longitude').value = this.longitude;
+                this.coordinatesSaved = true;
+                
+                setTimeout(() => {
+                    this.coordinatesSaved = false;
+                }, 3000);
             },
             
             initMap() {
