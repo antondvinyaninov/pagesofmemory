@@ -1,7 +1,7 @@
 <script>
 function photoUpload() {
     return {
-        previewUrl: '{{ $memorial->photo ? asset('storage/' . $memorial->photo) : '' }}',
+        previewUrl: '{{ $memorial->photo ? Storage::url($memorial->photo) : '' }}',
         
         init() {
             // Если есть существующее фото, показываем его
