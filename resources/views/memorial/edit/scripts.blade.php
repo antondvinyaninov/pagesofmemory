@@ -24,14 +24,33 @@ function photoUpload() {
 }
 
 function educationList() {
+    const oldEducation = @json(old('education'));
+    let initialEducations = [];
+
+    if (Array.isArray(oldEducation)) {
+        initialEducations = oldEducation;
+    } else {
+        const savedEducation = @json($memorial->education ?? '');
+        const savedEducationDetails = @json($memorial->education_details ?? '');
+
+        if (typeof savedEducation === 'string' && savedEducation.trim() !== '') {
+            initialEducations = [{
+                name: savedEducation,
+                details: typeof savedEducationDetails === 'string' ? savedEducationDetails : ''
+            }];
+        }
+    }
+
     return {
-        educations: @json(old('education', $memorial->education ?? [])),
+        educations: initialEducations.slice(0, 5),
         
         addEducation() {
-            this.educations.push({
-                name: '',
-                details: ''
-            });
+            if (this.educations.length < 5) {
+                this.educations.push({
+                    name: '',
+                    details: ''
+                });
+            }
         },
         
         removeEducation(index) {
@@ -41,8 +60,25 @@ function educationList() {
 }
 
 function careerList() {
+    const oldCareer = @json(old('career'));
+    let initialCareers = [];
+
+    if (Array.isArray(oldCareer)) {
+        initialCareers = oldCareer;
+    } else {
+        const savedCareer = @json($memorial->career ?? '');
+        const savedCareerDetails = @json($memorial->career_details ?? '');
+
+        if (typeof savedCareer === 'string' && savedCareer.trim() !== '') {
+            initialCareers = [{
+                position: savedCareer,
+                details: typeof savedCareerDetails === 'string' ? savedCareerDetails : ''
+            }];
+        }
+    }
+
     return {
-        careers: @json(old('career', $memorial->career ?? [])),
+        careers: initialCareers.slice(0, 5),
         
         addCareer() {
             if (this.careers.length < 5) {
@@ -59,16 +95,39 @@ function careerList() {
     }
 }
 
-function achievementsList() {
+function normalizeExistingDocumentFiles(initialFiles = []) {
+    if (!Array.isArray(initialFiles)) {
+        return [];
+    }
+
+    return initialFiles
+        .filter((item) => item && typeof item === 'object' && typeof item.path === 'string' && item.path.trim() !== '')
+        .map((item) => {
+            const path = item.path.trim();
+            const title = typeof item.title === 'string' ? item.title : '';
+            const isPdf = item.isPdf === true || /\.pdf$/i.test(path);
+            const url = typeof item.url === 'string' ? item.url : '';
+
+            return {
+                title,
+                preview: !isPdf ? url : null,
+                isPdf,
+                path
+            };
+        });
+}
+
+function achievementsList(initialFiles = []) {
     return {
-        files: [],
+        files: normalizeExistingDocumentFiles(initialFiles),
         
         addAchievementFile() {
             const index = this.files.length;
             this.files.push({
                 title: '',
                 preview: null,
-                isPdf: false
+                isPdf: false,
+                path: null
             });
             
             // Автоматически открываем диалог выбора файла
@@ -84,7 +143,9 @@ function achievementsList() {
         handleFilePreview(event, index) {
             const file = event.target.files[0];
             if (!file) {
-                this.removeFile(index);
+                if (!this.files[index]?.path) {
+                    this.removeFile(index);
+                }
                 return;
             }
             
@@ -92,8 +153,10 @@ function achievementsList() {
             if (file.type === 'application/pdf') {
                 this.files[index].isPdf = true;
                 this.files[index].preview = null;
+                this.files[index].path = null;
             } else if (file.type.startsWith('image/')) {
                 this.files[index].isPdf = false;
+                this.files[index].path = null;
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     this.files[index].preview = e.target.result;
@@ -104,9 +167,15 @@ function achievementsList() {
     }
 }
 
-function militaryConflicts() {
+function militaryConflicts(initialCustomConflicts = []) {
+    const customConflicts = Array.isArray(initialCustomConflicts)
+        ? initialCustomConflicts
+            .filter((value) => typeof value === 'string' && value.trim() !== '')
+            .map((value) => ({ name: value.trim() }))
+        : [];
+
     return {
-        customConflicts: [],
+        customConflicts,
         
         addCustomConflict() {
             this.customConflicts.push({
@@ -120,16 +189,17 @@ function militaryConflicts() {
     }
 }
 
-function militaryFilesList() {
+function militaryFilesList(initialFiles = []) {
     return {
-        files: [],
+        files: normalizeExistingDocumentFiles(initialFiles),
         
         addFile() {
             const index = this.files.length;
             this.files.push({
                 title: '',
                 preview: null,
-                isPdf: false
+                isPdf: false,
+                path: null
             });
             
             // Автоматически открываем диалог выбора файла
@@ -145,7 +215,9 @@ function militaryFilesList() {
         handleFilePreview(event, index) {
             const file = event.target.files[0];
             if (!file) {
-                this.removeFile(index);
+                if (!this.files[index]?.path) {
+                    this.removeFile(index);
+                }
                 return;
             }
             
@@ -153,8 +225,10 @@ function militaryFilesList() {
             if (file.type === 'application/pdf') {
                 this.files[index].isPdf = true;
                 this.files[index].preview = null;
+                this.files[index].path = null;
             } else if (file.type.startsWith('image/')) {
                 this.files[index].isPdf = false;
+                this.files[index].path = null;
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     this.files[index].preview = e.target.result;
@@ -726,6 +800,146 @@ function biographyEditor() {
                     this.$refs.textarea.value = this.editor.root.innerHTML;
                 }
             }
+        }
+    }
+}
+
+function mediaPhotos() {
+    const existingPhotos = @json($memorial->media_photos ?? []);
+
+    return {
+        photos: [],
+        existingPhotos,
+        s3Endpoint: '{{ config('filesystems.disks.s3.endpoint') }}',
+        s3Bucket: '{{ config('filesystems.disks.s3.bucket') }}',
+
+        init() {
+            if (!Array.isArray(this.existingPhotos)) {
+                return;
+            }
+
+            this.existingPhotos
+                .filter((photoPath) => typeof photoPath === 'string' && photoPath.trim() !== '')
+                .forEach((photoPath) => {
+                    let photoUrl = photoPath;
+                    if (!photoPath.startsWith('http')) {
+                        const cleanPath = photoPath.startsWith('/') ? photoPath.substring(1) : photoPath;
+                        photoUrl = `${this.s3Endpoint}/${this.s3Bucket}/${cleanPath}`;
+                    }
+
+                    this.photos.push({
+                        preview: photoUrl,
+                        existing: true,
+                        url: photoPath
+                    });
+                });
+        },
+        
+        addPhoto() {
+            if (this.photos.length < 5) {
+                const index = this.photos.length;
+                this.photos.push({
+                    preview: null,
+                    existing: false
+                });
+                
+                // Открываем диалог выбора файла
+                this.$nextTick(() => {
+                    document.getElementById('media_photo_' + index).click();
+                });
+            }
+        },
+        
+        removePhoto(index) {
+            this.photos.splice(index, 1);
+        },
+        
+        handlePhotoPreview(event, index) {
+            const file = event.target.files[0];
+            if (!file) {
+                this.removePhoto(index);
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер: 10MB');
+                this.removePhoto(index);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.photos[index].preview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+function mediaVideos() {
+    const existingVideos = @json($memorial->media_videos ?? []);
+
+    return {
+        videos: [],
+        existingVideos,
+        s3Endpoint: '{{ config('filesystems.disks.s3.endpoint') }}',
+        s3Bucket: '{{ config('filesystems.disks.s3.bucket') }}',
+
+        init() {
+            if (!Array.isArray(this.existingVideos)) {
+                return;
+            }
+
+            this.existingVideos
+                .filter((videoPath) => typeof videoPath === 'string' && videoPath.trim() !== '')
+                .forEach((videoPath) => {
+                    let videoUrl = videoPath;
+                    if (!videoPath.startsWith('http')) {
+                        const cleanPath = videoPath.startsWith('/') ? videoPath.substring(1) : videoPath;
+                        videoUrl = `${this.s3Endpoint}/${this.s3Bucket}/${cleanPath}`;
+                    }
+
+                    this.videos.push({
+                        preview: videoUrl,
+                        existing: true,
+                        url: videoPath
+                    });
+                });
+        },
+        
+        addVideo() {
+            if (this.videos.length < 2) {
+                const index = this.videos.length;
+                this.videos.push({
+                    preview: null,
+                    existing: false
+                });
+                
+                // Открываем диалог выбора файла
+                this.$nextTick(() => {
+                    document.getElementById('media_video_' + index).click();
+                });
+            }
+        },
+        
+        removeVideo(index) {
+            this.videos.splice(index, 1);
+        },
+        
+        handleVideoPreview(event, index) {
+            const file = event.target.files[0];
+            if (!file) {
+                this.removeVideo(index);
+                return;
+            }
+
+            if (file.size > 100 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер: 100MB');
+                this.removeVideo(index);
+                return;
+            }
+            
+            this.videos[index].preview = URL.createObjectURL(file);
         }
     }
 }

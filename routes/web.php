@@ -3,10 +3,39 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MemorialController;
 use App\Http\Controllers\AuthController;
+use App\Models\Memorial;
 
 Route::get('/', function () {
-    return view('welcome');
+    $recentMemorials = Memorial::query()
+        ->where('status', 'published')
+        ->where(function ($query) {
+            $query->where('privacy', 'public')->orWhereNull('privacy');
+        })
+        ->select('id', 'first_name', 'middle_name', 'last_name', 'birth_date', 'death_date', 'birth_place', 'views', 'photo', 'updated_at')
+        ->withCount('memories')
+        ->orderByDesc('updated_at')
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
+
+    return view('welcome', compact('recentMemorials'));
 });
+
+Route::get('/sitemap.xml', function () {
+    $memorials = cache()->remember('sitemap_published_memorials', 3600, function () {
+        return Memorial::where('status', 'published')
+            ->where(function ($query) {
+                $query->where('privacy', 'public')->orWhereNull('privacy');
+            })
+            ->select('id', 'updated_at')
+            ->orderByDesc('updated_at')
+            ->get();
+    });
+
+    return response()
+        ->view('sitemap', compact('memorials'))
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap.xml');
 
 Route::get('/memorial/id{id}', [MemorialController::class, 'show'])->name('memorial.show')->where('id', '[0-9]+');
 Route::get('/memorial/create', [MemorialController::class, 'create'])->middleware('auth')->name('memorial.create');
@@ -32,6 +61,7 @@ Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth')->
 
 // User profile route (public profiles)
 Route::get('/user/id{id}', [App\Http\Controllers\UserController::class, 'show'])->name('user.show')->where('id', '[0-9]+');
+Route::redirect('/user/admin', '/admin');
 
 // User profile edit
 Route::get('/user/edit', [App\Http\Controllers\UserController::class, 'edit'])->middleware('auth')->name('user.edit');
@@ -47,6 +77,22 @@ Route::put('/user/privacy', [App\Http\Controllers\UserController::class, 'update
 
 // API для конвертации HEIC
 Route::post('/api/convert-heic', [App\Http\Controllers\UserController::class, 'convertHeic'])->middleware('auth');
+
+// Admin routes
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+    Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
+    Route::get('/memorials', [App\Http\Controllers\AdminController::class, 'memorials'])->name('admin.memorials');
+    Route::get('/analytics', [App\Http\Controllers\AdminController::class, 'analytics'])->name('admin.analytics');
+    Route::get('/seo', [App\Http\Controllers\AdminController::class, 'seo'])->name('admin.seo');
+    Route::get('/newsletter', [App\Http\Controllers\AdminController::class, 'newsletter'])->name('admin.newsletter');
+    Route::post('/newsletter/test', [App\Http\Controllers\AdminController::class, 'sendNewsletterTest'])->name('admin.newsletter.test');
+    Route::post('/newsletter/send', [App\Http\Controllers\AdminController::class, 'sendNewsletterCampaign'])->name('admin.newsletter.send');
+    Route::get('/settings', [App\Http\Controllers\AdminController::class, 'settings'])->name('admin.settings');
+    Route::post('/settings', [App\Http\Controllers\AdminController::class, 'updateSettings'])->name('admin.settings.update');
+    Route::delete('/users/{id}', [App\Http\Controllers\AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::delete('/memorials/{id}', [App\Http\Controllers\AdminController::class, 'deleteMemorial'])->name('admin.memorials.delete');
+});
 
 // Тестовая страница карты
 Route::get('/test-map', function () {

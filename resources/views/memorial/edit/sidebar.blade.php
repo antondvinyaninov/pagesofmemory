@@ -1,6 +1,7 @@
 <!-- Боковая панель с навигацией -->
 <aside class="lg:w-80 lg:sticky lg:top-4 lg:h-fit">
-    <div class="bg-white rounded-xl shadow-md p-6">
+    <!-- Десктопная версия -->
+    <div class="hidden lg:block bg-white rounded-xl shadow-md p-6">
         <h2 class="text-lg font-semibold text-slate-700 mb-4">Разделы</h2>
         <nav class="space-y-2">
             <button @click="activeTab = 'basic'" :class="activeTab === 'basic' ? 'text-gray-700 bg-red-50' : 'text-gray-600 hover:bg-gray-50'" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left">

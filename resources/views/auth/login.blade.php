@@ -3,20 +3,20 @@
 @section('title', 'Вход и регистрация')
 
 @section('content')
-<div class="bg-gray-50 py-16 px-4 min-h-screen" x-data="{ mode: 'login', showPassword: false, showConfirmPassword: false }">
+<div class="bg-gray-200 py-16 px-4 min-h-screen" x-data="{ mode: 'login', showPassword: false, showConfirmPassword: false }">
     <div class="max-w-md w-full mx-auto">
         <!-- Переключатель режимов -->
-        <div class="flex bg-white rounded-lg shadow-md p-1 mb-6">
+        <div class="flex rounded-lg border border-slate-200 bg-slate-100 p-1 mb-6">
             <button 
                 @click="mode = 'login'" 
-                :class="mode === 'login' ? 'bg-red-500 text-white' : 'text-gray-600 hover:text-gray-800'"
+                :class="mode === 'login' ? 'bg-red-500 text-white' : 'text-slate-600 hover:text-slate-800'"
                 class="flex-1 py-3 px-4 rounded-md font-medium transition-all duration-200"
             >
                 Вход
             </button>
             <button 
                 @click="mode = 'register'" 
-                :class="mode === 'register' ? 'bg-red-500 text-white' : 'text-gray-600 hover:text-gray-800'"
+                :class="mode === 'register' ? 'bg-red-500 text-white' : 'text-slate-600 hover:text-slate-800'"
                 class="flex-1 py-3 px-4 rounded-md font-medium transition-all duration-200"
             >
                 Регистрация
@@ -24,10 +24,10 @@
         </div>
 
         <!-- Форма входа -->
-        <div x-show="mode === 'login'" x-transition class="bg-white rounded-lg shadow-lg p-8">
+        <div x-show="mode === 'login'" x-transition class="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-bold text-slate-700 mb-2">Вход в систему</h1>
-                <p class="text-gray-500">Введите ваши данные для входа</p>
+                <p class="text-slate-500">Введите ваши данные для входа</p>
             </div>
 
             <form action="/login" method="POST" class="space-y-4">
@@ -35,7 +35,7 @@
                 
                 <!-- Email -->
                 <div>
-                    <label for="login-email" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="login-email" class="block text-sm font-medium text-slate-800 mb-2">
                         Email
                     </label>
                     <input
@@ -54,7 +54,7 @@
 
                 <!-- Пароль -->
                 <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="login-password" class="block text-sm font-medium text-slate-800 mb-2">
                         Пароль
                     </label>
                     <div class="relative">
@@ -69,7 +69,7 @@
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-800 transition-colors"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700 transition-colors"
                         >
                             <svg x-show="!showPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -106,10 +106,10 @@
         </div>
 
         <!-- Форма регистрации -->
-        <div x-show="mode === 'register'" x-transition class="bg-white rounded-lg shadow-lg p-8">
+        <div x-show="mode === 'register'" x-transition class="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-bold text-slate-700 mb-2">Регистрация</h1>
-                <p class="text-gray-500">Создайте новый аккаунт</p>
+                <p class="text-slate-500">Создайте новый аккаунт</p>
             </div>
 
             <form action="/register" method="POST" class="space-y-4">
@@ -117,7 +117,7 @@
                 
                 <!-- Имя -->
                 <div>
-                    <label for="register-first-name" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="register-first-name" class="block text-sm font-medium text-slate-800 mb-2">
                         Имя
                     </label>
                     <input
@@ -136,7 +136,7 @@
 
                 <!-- Фамилия -->
                 <div>
-                    <label for="register-last-name" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="register-last-name" class="block text-sm font-medium text-slate-800 mb-2">
                         Фамилия
                     </label>
                     <input
@@ -155,7 +155,7 @@
 
                 <!-- Email -->
                 <div>
-                    <label for="register-email" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="register-email" class="block text-sm font-medium text-slate-800 mb-2">
                         Email
                     </label>
                     <input
@@ -174,7 +174,7 @@
 
                 <!-- Пароль -->
                 <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="register-password" class="block text-sm font-medium text-slate-800 mb-2">
                         Пароль
                     </label>
                     <div class="relative">
@@ -189,7 +189,7 @@
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-800 transition-colors"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700 transition-colors"
                         >
                             <svg x-show="!showPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -207,7 +207,7 @@
 
                 <!-- Подтверждение пароля -->
                 <div>
-                    <label for="register-password-confirmation" class="block text-sm font-medium text-gray-800 mb-2">
+                    <label for="register-password-confirmation" class="block text-sm font-medium text-slate-800 mb-2">
                         Подтвердите пароль
                     </label>
                     <div class="relative">
@@ -222,7 +222,7 @@
                         <button
                             type="button"
                             @click="showConfirmPassword = !showConfirmPassword"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-800 transition-colors"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700 transition-colors"
                         >
                             <svg x-show="!showConfirmPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

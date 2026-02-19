@@ -9,15 +9,15 @@
             <!-- Основной контент -->
             <main class="flex-1 space-y-6">
                 <!-- Созданные мемориалы -->
-                <div class="bg-white rounded-xl shadow-md p-8">
+                <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8">
                     <h2 class="text-xl font-semibold text-slate-700 mb-4">Созданные мемориалы</h2>
                     
                     @if($user->memorials && $user->memorials->count() > 0)
                         <div class="space-y-6">
                             @foreach($user->memorials as $memorial)
-                                <div class="flex gap-4">
+                                <div class="flex flex-col xl:flex-row gap-4">
                                     <!-- Hero блок мемориала -->
-                                    <div class="flex-1 relative bg-slate-700 text-white rounded-xl overflow-hidden shadow-xl">
+                                    <div class="flex-1 min-w-0 relative bg-slate-700 text-white rounded-xl overflow-hidden shadow-xl">
                                         <div class="absolute inset-0 bg-gradient-to-br from-slate-700/95 to-slate-800/85"></div>
                                         
                                         <!-- Религиозный символ -->
@@ -39,10 +39,10 @@
                                         </div>
                                         @endif
                                         
-                                        <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" class="block relative p-6 hover:bg-slate-600/20 transition-colors">
+                                        <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" class="block relative p-4 sm:p-6 hover:bg-slate-600/20 transition-colors">
                                             <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
                                                 <!-- Фото -->
-                                                <div class="w-60 h-60 md:w-64 md:h-64 bg-gray-300 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
+                                                <div class="w-full max-w-[260px] sm:max-w-[280px] md:w-64 md:h-64 aspect-square bg-gray-300 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
                                                     @if($memorial->photo)
                                                         <img src="{{ Storage::disk('s3')->url($memorial->photo) }}" alt="{{ $memorial->first_name }} {{ $memorial->last_name }}" class="w-full h-full object-cover">
                                                     @else
@@ -55,8 +55,8 @@
                                                 </div>
 
                                                 <!-- Информация -->
-                                                <div class="flex-1 text-center md:text-left">
-                                                    <h3 class="text-2xl md:text-3xl font-bold mb-3 leading-tight">
+                                                <div class="flex-1 min-w-0 text-center md:text-left">
+                                                    <h3 class="text-2xl md:text-3xl font-bold mb-3 leading-tight break-words">
                                                         {{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}
                                                     </h3>
                                                     
@@ -76,13 +76,13 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                         </svg>
-                                                        <span class="text-sm md:text-base opacity-90">{{ expand_region_abbreviations($memorial->birth_place) }}</span>
+                                                        <span class="text-sm md:text-base opacity-90 break-words">{{ expand_region_abbreviations($memorial->birth_place) }}</span>
                                                     </div>
                                                     @endif
                                                     
                                                     @if($memorial->biography)
                                                     <div class="mb-3">
-                                                        <div class="text-base md:text-lg font-semibold text-white italic">
+                                                        <div class="text-base md:text-lg font-semibold text-white italic break-words">
                                                             {{ $memorial->biography }}
                                                         </div>
                                                     </div>
@@ -95,8 +95,8 @@
                                     <!-- Блок управления (только для владельца) -->
                                     @auth
                                         @if(Auth::id() === $user->id)
-                                        <div class="w-64 flex-shrink-0">
-                                            <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-4">
+                                        <div class="w-full xl:w-72 flex-shrink-0">
+                                            <div class="bg-white rounded-xl shadow-md overflow-hidden xl:sticky xl:top-4">
                                                 <!-- Заголовок -->
                                                 <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-4">
                                                     <h4 class="text-base font-bold text-white flex items-center gap-2">
@@ -159,7 +159,7 @@
                             <!-- Добавить новый мемориал (только для владельца) -->
                             @auth
                                 @if(Auth::id() === $user->id)
-                                <a href="{{ route('memorial.create') }}" class="block border-2 border-dashed border-red-300 hover:border-red-500 rounded-xl p-8 transition-colors group bg-red-50/50 hover:bg-red-50">
+                                <a href="{{ route('memorial.create') }}" class="block border-2 border-dashed border-red-300 hover:border-red-500 rounded-xl p-5 sm:p-8 transition-colors group bg-red-50/50 hover:bg-red-50">
                                     <div class="flex flex-col items-center justify-center text-center">
                                         <div class="w-12 h-12 bg-red-100 group-hover:bg-red-200 rounded-full flex items-center justify-center mb-3 transition-colors">
                                             <svg class="w-6 h-6 text-red-500 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,7 +194,7 @@
                 </div>
 
                 <!-- Оставленные воспоминания -->
-                <div class="bg-white rounded-xl shadow-md p-8">
+                <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8">
                     <h2 class="text-xl font-semibold text-slate-700 mb-6">Оставленные воспоминания</h2>
                     @if($user->memories && $user->memories->count() > 0)
                         <div class="space-y-4">
@@ -225,15 +225,68 @@
                                             <div class="bg-white rounded-lg p-4 mb-3 shadow-sm">
                                                 <p class="text-gray-700 leading-relaxed mb-3">{{ $memory->content }}</p>
                                                 
-                                                <!-- Фотографии воспоминания -->
-                                                @if($memory->media && is_array($memory->media) && count($memory->media) > 0)
+                                                <!-- Медиа воспоминания (поддержка и старого, и нового формата) -->
+                                                @php
+                                                    $photoUrls = [];
+                                                    $videoUrls = [];
+                                                    $mediaItems = is_array($memory->media) ? $memory->media : [];
+
+                                                    $resolveMediaUrl = function ($value) {
+                                                        if (!is_string($value) || $value === '') {
+                                                            return null;
+                                                        }
+
+                                                        return filter_var($value, FILTER_VALIDATE_URL)
+                                                            ? $value
+                                                            : \Storage::disk('s3')->url($value);
+                                                    };
+
+                                                    foreach ($mediaItems as $item) {
+                                                        $type = null;
+                                                        $urlValue = null;
+
+                                                        if (is_array($item)) {
+                                                            $type = $item['type'] ?? null;
+                                                            $urlValue = $item['url'] ?? null;
+                                                        } elseif (is_string($item)) {
+                                                            $urlValue = $item;
+                                                        }
+
+                                                        $resolvedUrl = $resolveMediaUrl($urlValue);
+                                                        if (!$resolvedUrl) {
+                                                            continue;
+                                                        }
+
+                                                        if (!$type && is_string($urlValue)) {
+                                                            $path = parse_url($urlValue, PHP_URL_PATH) ?: $urlValue;
+                                                            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                                            $type = in_array($extension, ['mp4', 'mov', 'webm', 'm4v', 'avi', 'mkv'], true) ? 'video' : 'image';
+                                                        }
+
+                                                        if ($type === 'video') {
+                                                            $videoUrls[] = $resolvedUrl;
+                                                        } else {
+                                                            $photoUrls[] = $resolvedUrl;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if(count($photoUrls) > 0)
                                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-                                                    @foreach($memory->media as $photo)
-                                                        @if(is_string($photo))
-                                                        <div class="aspect-square rounded-lg overflow-hidden">
-                                                            <img src="{{ Storage::disk('s3')->url($photo) }}" alt="" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
-                                                        </div>
-                                                        @endif
+                                                    @foreach($photoUrls as $photoUrl)
+                                                    <div class="aspect-square rounded-lg overflow-hidden">
+                                                        <img src="{{ $photoUrl }}" alt="" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+                                                    </div>
+                                                    @endforeach
+                                                </div>
+                                                @endif
+
+                                                @if(count($videoUrls) > 0)
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                                                    @foreach($videoUrls as $videoUrl)
+                                                    <div class="rounded-lg overflow-hidden bg-gray-900">
+                                                        <video src="{{ $videoUrl }}" controls preload="metadata" class="w-full h-full object-cover"></video>
+                                                    </div>
                                                     @endforeach
                                                 </div>
                                                 @endif

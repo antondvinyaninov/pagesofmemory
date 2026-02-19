@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,12 @@ class UserController extends Controller
 {
     public function show($id)
     {
+        if (!AppSetting::get('access.enable_public_profiles', true)) {
+            if (!auth()->check() || (int) auth()->id() !== (int) $id) {
+                abort(403, 'Публичные профили временно отключены');
+            }
+        }
+
         $user = User::with([
             'memorials' => function($query) use ($id) {
                 // Если смотрим свой профиль - показываем все мемориалы
@@ -19,7 +26,10 @@ class UserController extends Controller
                     return $query;
                 }
                 // Для других пользователей - только опубликованные
-                return $query->where('status', 'published');
+                return $query->where('status', 'published')
+                    ->where(function ($visibilityQuery) {
+                        $visibilityQuery->where('privacy', 'public')->orWhereNull('privacy');
+                    });
             },
             'memories.memorial' // Загружаем воспоминания пользователя с мемориалами
         ])->findOrFail($id);

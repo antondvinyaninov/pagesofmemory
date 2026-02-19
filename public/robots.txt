@@ -1,2 +1,22 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Private and service sections
+Disallow: /admin
+Disallow: /admin/
+Disallow: /user/admin
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /profile
+Disallow: /user/edit
+Disallow: /user/update
+Disallow: /user/security
+Disallow: /user/password
+Disallow: /user/privacy
+Disallow: /memorial/create
+Disallow: /memorial/*/edit
+Disallow: /api/
+Disallow: /test-map
+
+Sitemap: /sitemap.xml

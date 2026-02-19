@@ -11,7 +11,7 @@ class StorageService
     /**
      * Конвертировать изображение в WebP
      */
-    private function convertToWebP(UploadedFile $file, int $maxWidth = null, int $maxHeight = null): string
+    private function convertToWebP(UploadedFile $file, ?int $maxWidth = null, ?int $maxHeight = null): string
     {
         // Проверяем, является ли файл HEIC
         $extension = strtolower($file->getClientOriginalExtension());
@@ -126,6 +126,22 @@ class StorageService
     }
 
     /**
+     * Загрузить документ/фото военной службы
+     */
+    public function uploadMemorialMilitaryFile(int $memorialId, UploadedFile $file): string
+    {
+        return $this->uploadMemorialDocument($memorialId, $file, 'military');
+    }
+
+    /**
+     * Загрузить документ/фото достижений
+     */
+    public function uploadMemorialAchievementFile(int $memorialId, UploadedFile $file): string
+    {
+        return $this->uploadMemorialDocument($memorialId, $file, 'achievements');
+    }
+
+    /**
      * Загрузить фото к воспоминанию
      */
     public function uploadMemoryPhoto(int $memoryId, UploadedFile $file): string
@@ -149,6 +165,28 @@ class StorageService
     }
 
     /**
+     * Загрузить изображение или PDF-документ для мемориала
+     */
+    private function uploadMemorialDocument(int $memorialId, UploadedFile $file, string $folder): string
+    {
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+
+        if ($extension === 'pdf') {
+            $filename = uniqid() . '.pdf';
+            $path = "memorials/{$memorialId}/{$folder}/{$filename}";
+            Storage::put($path, file_get_contents($file), 'public');
+            return $path;
+        }
+
+        $filename = uniqid() . '.webp';
+        $path = "memorials/{$memorialId}/{$folder}/{$filename}";
+        $webpContent = $this->convertToWebP($file, 1920, 1080);
+        Storage::put($path, $webpContent, 'public');
+
+        return $path;
+    }
+
+    /**
      * Удалить файл
      */
     public function deleteFile(string $path): bool
@@ -164,4 +202,3 @@ class StorageService
         return Storage::url($path);
     }
 }
-

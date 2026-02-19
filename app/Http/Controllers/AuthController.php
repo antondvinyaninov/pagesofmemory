@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\User;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -34,6 +35,12 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        if (!AppSetting::get('access.allow_registration', true)) {
+            return back()->withErrors([
+                'email' => 'Регистрация временно отключена администратором.',
+            ])->onlyInput('email');
+        }
+
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -48,6 +55,8 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+
+        app(EmailNotificationService::class)->sendWelcomeEmail($user);
 
         return redirect('/');
     }

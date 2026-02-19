@@ -39,8 +39,11 @@
                                     <!-- Образование -->
                                     <div x-data="educationList()">
                                         <div class="flex items-center justify-between mb-3">
-                                            <label class="block text-sm font-medium text-gray-700">Образование</label>
-                                            <button type="button" @click="addEducation()" class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Образование</label>
+                                                <p class="text-xs text-gray-500 mt-1">Можно добавить до 5 учебных заведений</p>
+                                            </div>
+                                            <button type="button" @click="addEducation()" :disabled="educations.length >= 5" :class="educations.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''" class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                 </svg>
@@ -141,9 +144,75 @@
                                 </div>
                             </div>
 
+                            @php
+                                $militaryConflictOptions = [
+                                    'ww2' => 'Великая Отечественная война (1941-1945)',
+                                    'afghanistan' => 'Афганская война (1979-1989)',
+                                    'chechnya_1' => 'Первая чеченская война (1994-1996)',
+                                    'chechnya_2' => 'Вторая чеченская война (1999-2009)',
+                                    'georgia' => 'Война в Южной Осетии (2008)',
+                                    'syria' => 'Сирийский конфликт (2015-н.в.)',
+                                    'ukraine' => 'Специальная военная операция (2022-н.в.)',
+                                ];
+                                $savedMilitaryConflicts = collect(old('military_conflicts', is_array($memorial->military_conflicts ?? null) ? $memorial->military_conflicts : []))
+                                    ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+                                    ->map(fn ($value) => trim($value))
+                                    ->values();
+                                $savedCustomMilitaryConflicts = collect(old('military_conflicts_custom', $savedMilitaryConflicts->reject(fn ($value) => array_key_exists($value, $militaryConflictOptions))->all()))
+                                    ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+                                    ->map(fn ($value) => trim($value))
+                                    ->values();
+                                $savedMilitaryFilesForJs = collect(old('existing_military_files', is_array($memorial->military_files ?? null) ? $memorial->military_files : []))
+                                    ->filter(fn ($item) => is_array($item))
+                                    ->map(function ($item) {
+                                        $path = trim((string) ($item['path'] ?? ''));
+                                        if ($path === '') {
+                                            return null;
+                                        }
+
+                                        $isPdf = strtolower((string) pathinfo($path, PATHINFO_EXTENSION)) === 'pdf';
+
+                                        return [
+                                            'path' => $path,
+                                            'title' => trim((string) ($item['title'] ?? '')),
+                                            'url' => filter_var($path, FILTER_VALIDATE_URL) ? $path : s3_url($path),
+                                            'isPdf' => $isPdf,
+                                        ];
+                                    })
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+                                $savedAchievementFilesForJs = collect(old('existing_achievement_files', is_array($memorial->achievement_files ?? null) ? $memorial->achievement_files : []))
+                                    ->filter(fn ($item) => is_array($item))
+                                    ->map(function ($item) {
+                                        $path = trim((string) ($item['path'] ?? ''));
+                                        if ($path === '') {
+                                            return null;
+                                        }
+
+                                        $isPdf = strtolower((string) pathinfo($path, PATHINFO_EXTENSION)) === 'pdf';
+
+                                        return [
+                                            'path' => $path,
+                                            'title' => trim((string) ($item['title'] ?? '')),
+                                            'url' => filter_var($path, FILTER_VALIDATE_URL) ? $path : s3_url($path),
+                                            'isPdf' => $isPdf,
+                                        ];
+                                    })
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+                                $hasMilitaryData = (bool) old('military_service', $memorial->military_service)
+                                    || (bool) old('military_rank', $memorial->military_rank)
+                                    || (bool) old('military_years', $memorial->military_years)
+                                    || (bool) old('military_details', $memorial->military_details)
+                                    || $savedMilitaryConflicts->isNotEmpty()
+                                    || $savedCustomMilitaryConflicts->isNotEmpty();
+                            @endphp
+
                             <!-- Блок: Военная служба -->
                             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-                                <div x-data="{ hasMilitary: false }">
+                                <div x-data="{ hasMilitary: @js($hasMilitaryData) }">
                                     <label class="flex items-center gap-2 cursor-pointer mb-4">
                                         <input 
                                             type="checkbox" 
@@ -189,38 +258,22 @@
                                         </div>
 
                                         <!-- Участие в военных конфликтах -->
-                                        <div x-data="militaryConflicts()">
+                                        <div x-data="militaryConflicts(@js($savedCustomMilitaryConflicts->all()))">
                                             <label class="block text-sm font-medium text-gray-700 mb-3">Участие в военных конфликтах</label>
                                             
                                             <div class="space-y-2 mb-3 bg-white p-4 rounded-lg border border-blue-200">
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="ww2" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Великая Отечественная война (1941-1945)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="afghanistan" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Афганская война (1979-1989)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="chechnya_1" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Первая чеченская война (1994-1996)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="chechnya_2" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Вторая чеченская война (1999-2009)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="georgia" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Война в Южной Осетии (2008)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="syria" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Сирийский конфликт (2015-н.в.)</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="military_conflicts[]" value="ukraine" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="text-sm text-gray-700">Специальная военная операция (2022-н.в.)</span>
-                                                </label>
+                                                @foreach($militaryConflictOptions as $conflictCode => $conflictLabel)
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="military_conflicts[]"
+                                                            value="{{ $conflictCode }}"
+                                                            @checked($savedMilitaryConflicts->contains($conflictCode))
+                                                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                        >
+                                                        <span class="text-sm text-gray-700">{{ $conflictLabel }}</span>
+                                                    </label>
+                                                @endforeach
                                                 
                                                 <!-- Другие конфликты -->
                                                 <template x-for="(conflict, index) in customConflicts" :key="index">
@@ -262,7 +315,7 @@
                                         </div>
 
                                         <!-- Загрузка документов военной службы -->
-                                        <div x-data="militaryFilesList()">
+                                        <div x-data="militaryFilesList(@js($savedMilitaryFilesForJs))">
                                             <label class="block text-sm font-medium text-gray-700 mb-3">Фото документов, наград, удостоверений</label>
                                             
                                             <div class="flex gap-3 overflow-x-auto pb-2">
@@ -281,7 +334,7 @@
                                                     <div class="flex-shrink-0 relative group">
                                                         <div class="w-24 h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-blue-200 relative">
                                                             <!-- Превью изображения -->
-                                                            <div x-show="item.preview" class="w-full h-full">
+                                                            <div x-show="item.preview && !item.isPdf" class="w-full h-full">
                                                                 <img :src="item.preview" class="w-full h-full object-cover">
                                                             </div>
                                                             
@@ -309,12 +362,18 @@
                                                                 @change="handleFilePreview($event, index)"
                                                                 class="hidden"
                                                             >
+
+                                                            <input
+                                                                type="hidden"
+                                                                :name="item.path ? 'existing_military_files[' + index + '][path]' : ''"
+                                                                :value="item.path || ''"
+                                                            >
                                                         </div>
 
                                                         <!-- Название под превью -->
                                                         <input 
                                                             type="text" 
-                                                            :name="'military_files[' + index + '][title]'" 
+                                                            :name="item.path ? 'existing_military_files[' + index + '][title]' : 'military_files[' + index + '][title]'" 
                                                             x-model="item.title"
                                                             placeholder="Название"
                                                             class="mt-2 w-24 px-2 py-1 text-xs text-center border border-blue-200 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
@@ -361,7 +420,7 @@
                                     </div>
 
                                     <!-- Загрузка документов наград -->
-                                    <div x-data="achievementsList()">
+                                    <div x-data="achievementsList(@js($savedAchievementFilesForJs))">
                                         <label class="block text-sm font-medium text-gray-700 mb-3">Фото достижений, наград, орденов, заслуг, писем</label>
                                         
                                         <div class="flex gap-3 overflow-x-auto pb-2">
@@ -380,7 +439,7 @@
                                                 <div class="flex-shrink-0 relative group">
                                                     <div class="w-24 h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-blue-200 relative">
                                                         <!-- Превью изображения -->
-                                                        <div x-show="item.preview" class="w-full h-full">
+                                                        <div x-show="item.preview && !item.isPdf" class="w-full h-full">
                                                             <img :src="item.preview" class="w-full h-full object-cover">
                                                         </div>
                                                         
@@ -408,12 +467,18 @@
                                                             @change="handleFilePreview($event, index)"
                                                             class="hidden"
                                                         >
+
+                                                        <input
+                                                            type="hidden"
+                                                            :name="item.path ? 'existing_achievement_files[' + index + '][path]' : ''"
+                                                            :value="item.path || ''"
+                                                        >
                                                     </div>
 
                                                     <!-- Название под превью -->
                                                     <input 
                                                         type="text" 
-                                                        :name="'achievement_files[' + index + '][title]'" 
+                                                        :name="item.path ? 'existing_achievement_files[' + index + '][title]' : 'achievement_files[' + index + '][title]'" 
                                                         x-model="item.title"
                                                         placeholder="Название"
                                                         class="mt-2 w-24 px-2 py-1 text-xs text-center border border-blue-200 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
@@ -427,4 +492,3 @@
                                 </div>
                             </div>
                         </div>
-

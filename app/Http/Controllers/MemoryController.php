@@ -2,16 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
+use App\Models\Comment;
 use App\Models\Memory;
 use App\Models\Memorial;
 use App\Models\Relationship;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 
 class MemoryController extends Controller
 {
     public function store(Request $request, $memorialId)
     {
+        if (!AppSetting::get('access.enable_memories', true)) {
+            return redirect()->back()->with('error', 'Добавление воспоминаний временно отключено');
+        }
+
         $memorial = Memorial::findOrFail($memorialId);
+
+        if (!$this->canAccessMemorial($memorial)) {
+            abort(403, 'У вас нет доступа к этому мемориалу');
+        }
+
+        if ($memorial->moderate_memories && (int) $memorial->user_id !== (int) auth()->id()) {
+            return redirect()->route('memorial.show', ['id' => $memorialId])
+                ->with('error', 'Владелец мемориала включил модерацию. Новые воспоминания временно недоступны.');
+        }
         
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:10'],
@@ -50,6 +66,8 @@ class MemoryController extends Controller
             'content' => $validated['content'],
         ]);
 
+        app(EmailNotificationService::class)->sendNewMemoryNotification($memorial, $memory);
+
         // TODO: Обработка загрузки медиа файлов
 
         return redirect()->route('memorial.show', ['id' => $memorialId])
@@ -58,7 +76,14 @@ class MemoryController extends Controller
     
     public function like(Request $request, $id)
     {
-        $memory = Memory::findOrFail($id);
+        $memory = Memory::with('memorial')->findOrFail($id);
+        if (!$memory->memorial || !$this->canAccessMemorial($memory->memorial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому мемориалу',
+            ], 403);
+        }
+
         $userId = auth()->id();
         
         // Проверяем, есть ли уже лайк от этого пользователя
@@ -98,17 +123,40 @@ class MemoryController extends Controller
     
     public function comment(Request $request, $id)
     {
-        $memory = Memory::findOrFail($id);
+        if (!AppSetting::get('access.enable_comments', true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Комментарии временно отключены',
+            ], 403);
+        }
+
+        $memory = Memory::with('memorial')->findOrFail($id);
+
+        if (!$memory->memorial || !$this->canAccessMemorial($memory->memorial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому мемориалу',
+            ], 403);
+        }
+
+        if ($memory->memorial->allow_comments === false) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Комментарии отключены владельцем мемориала',
+            ], 403);
+        }
         
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:500'],
         ]);
         
-        $comment = \App\Models\Comment::create([
+        $comment = Comment::create([
             'memory_id' => $memory->id,
             'user_id' => auth()->id(),
             'content' => $validated['content'],
         ]);
+
+        app(EmailNotificationService::class)->sendNewCommentNotification($memory, $comment);
         
         // Загружаем пользователя для ответа
         $comment->load('user');
@@ -117,6 +165,7 @@ class MemoryController extends Controller
             'success' => true,
             'comment' => [
                 'id' => $comment->id,
+                'author_id' => $comment->user->id,
                 'author_name' => $comment->user->name,
                 'author_avatar' => $comment->user->avatar ? \Storage::disk('s3')->url($comment->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&size=128&background=f3e5f5&color=7b1fa2&bold=true',
                 'content' => $comment->content,
@@ -128,7 +177,15 @@ class MemoryController extends Controller
     
     public function likeComment(Request $request, $id)
     {
-        $comment = \App\Models\Comment::findOrFail($id);
+        $comment = Comment::with('memory.memorial')->findOrFail($id);
+        $memorial = $comment->memory?->memorial;
+        if (!$memorial || !$this->canAccessMemorial($memorial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому мемориалу',
+            ], 403);
+        }
+
         $userId = auth()->id();
         
         // Проверяем, есть ли уже лайк от этого пользователя
@@ -168,7 +225,13 @@ class MemoryController extends Controller
     
     public function view(Request $request, $id)
     {
-        $memory = Memory::findOrFail($id);
+        $memory = Memory::with('memorial')->findOrFail($id);
+        if (!$memory->memorial || !$this->canViewMemorial($memory->memorial)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У вас нет доступа к этому мемориалу',
+            ], 403);
+        }
         
         // Увеличиваем счетчик просмотров
         // Можно добавить проверку, чтобы не считать просмотры от автора
@@ -178,5 +241,42 @@ class MemoryController extends Controller
             'success' => true,
             'views' => $memory->views
         ]);
+    }
+
+    private function canAccessMemorial(Memorial $memorial): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        return $this->canViewMemorial($memorial);
+    }
+
+    private function canViewMemorial(Memorial $memorial): bool
+    {
+        if ((int) $memorial->user_id === (int) auth()->id()) {
+            return true;
+        }
+
+        if ($memorial->status !== 'published') {
+            return false;
+        }
+
+        $privacy = in_array($memorial->privacy, ['public', 'family', 'private'], true)
+            ? $memorial->privacy
+            : 'public';
+
+        if ($privacy === 'public') {
+            return true;
+        }
+
+        if ($privacy === 'private') {
+            return false;
+        }
+
+        return Relationship::where('memorial_id', $memorial->id)
+            ->where('user_id', auth()->id())
+            ->where('confirmed', true)
+            ->exists();
     }
 }

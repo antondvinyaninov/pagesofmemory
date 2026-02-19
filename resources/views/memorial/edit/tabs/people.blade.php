@@ -10,7 +10,7 @@
                                     <label for="creator_relationship" class="block text-sm font-medium text-gray-700 mb-2">
                                         Кем вам приходится {{ $memorial->first_name }}?
                                     </label>
-                                    <select name="creator_relationship" id="creator_relationship" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                    <select name="creator_relationship" id="creator_relationship" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                         <option value="">Выберите связь</option>
                                         <optgroup label="Семья">
                                             <option value="husband" {{ old('creator_relationship', $userRelationship?->relationship_type) == 'husband' ? 'selected' : '' }}>Муж</option>
@@ -55,7 +55,7 @@
                                             id="creator_relationship_custom"
                                             value="{{ old('creator_relationship_custom', $userRelationship?->custom_relationship) }}"
                                             placeholder="Например: учитель, наставник, сват..."
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         >
                                     </div>
                                 </div>

@@ -9,6 +9,9 @@ class Memorial extends Model
     protected $fillable = [
         'user_id',
         'status',
+        'privacy',
+        'moderate_memories',
+        'allow_comments',
         'views',
         'last_name',
         'first_name',
@@ -20,7 +23,6 @@ class Memorial extends Model
         'biography',
         'religion',
         'full_biography',
-        'necrologue',
         'education',
         'education_details',
         'career',
@@ -31,7 +33,10 @@ class Memorial extends Model
         'military_service',
         'military_rank',
         'military_years',
+        'military_conflicts',
         'military_details',
+        'military_files',
+        'achievement_files',
         'burial_place',
         'burial_city',
         'burial_address',
@@ -39,12 +44,21 @@ class Memorial extends Model
         'burial_latitude',
         'burial_longitude',
         'burial_photos',
+        'media_photos',
+        'media_videos',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'death_date' => 'date',
+        'moderate_memories' => 'boolean',
+        'allow_comments' => 'boolean',
+        'military_conflicts' => 'array',
+        'military_files' => 'array',
+        'achievement_files' => 'array',
         'burial_photos' => 'array',
+        'media_photos' => 'array',
+        'media_videos' => 'array',
     ];
 
     public function user()
