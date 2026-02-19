@@ -9,9 +9,10 @@ Route::get('/', function () {
     // Статистика
     $stats = [
         'photos' => \DB::table('memorials')
-            ->whereNotNull('photos')
-            ->where('photos', '!=', '[]')
-            ->selectRaw('SUM(json_array_length(photos::json)) as total')
+            ->whereNotNull('media_photos')
+            ->whereRaw("media_photos::text != '[]'")
+            ->whereRaw("media_photos::text != 'null'")
+            ->selectRaw('SUM(jsonb_array_length(media_photos::jsonb)) as total')
             ->value('total') ?? 0,
         'memories' => \App\Models\Memory::count(),
         'users' => \App\Models\User::count(),
