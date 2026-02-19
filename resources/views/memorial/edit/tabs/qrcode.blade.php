@@ -246,43 +246,9 @@
                                         link.click();
                                     }
                                 } else if (format === 'svg') {
-                                    // Генерируем SVG QR-код с дополнительным контентом
-                                    const svg = generateQRSVG(memorialUrl, currentSize);
-                                    const blob = new Blob([svg], { type: 'image/svg+xml' });
-                                    const url = URL.createObjectURL(blob);
-                                    const link = document.createElement('a');
-                                    link.download = 'memorial-qr-code.svg';
-                                    link.href = url;
-                                    link.click();
-                                    URL.revokeObjectURL(url);
+                                    alert('SVG скачивание временно недоступно. Используйте PNG формат.');
                                 }
                             }
-
-                            @verbatim
-                            function generateQRSVG(text, size) {
-                                const qr = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.HIGH);
-                                const border = 4;
-                                const moduleSize = size / (qr.size + border * 2);
-                                
-                                let svg = '<?xml version="1.0" encoding="UTF-8"?>';
-                                svg += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + size + ' ' + size + '" stroke="none">';
-                                svg += '<rect width="100%" height="100%" fill="#ffffff"/>';
-                                svg += '<path d="';
-                                
-                                for (let y = 0; y < qr.size; y++) {
-                                    for (let x = 0; x < qr.size; x++) {
-                                        if (qr.getModule(x, y)) {
-                                            const px = (x + border) * moduleSize;
-                                            const py = (y + border) * moduleSize;
-                                            svg += 'M' + px + ',' + py + 'h' + moduleSize + 'v' + moduleSize + 'h-' + moduleSize + 'z ';
-                                        }
-                                    }
-                                }
-                                
-                                svg += '" fill="#000000"/></svg>';
-                                return svg;
-                            }
-                            @endverbatim
 
                             function printQR() {
                                 const canvas = document.querySelector('#qrcode canvas');
@@ -341,5 +307,4 @@
                                 });
                             });
                         </script>
-                        <script src="https://cdn.jsdelivr.net/npm/qrcodegen@1.8.0/js/qrcodegen.min.js"></script>
                         @endif
