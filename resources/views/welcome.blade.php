@@ -70,28 +70,28 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             <div class="mb-2 text-sm text-gray-500">Фотографий</div>
-                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">15,832</div>
+                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">{{ number_format($stats['photos'], 0, ',', ' ') }}</div>
                         </div>
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                             <svg class="mx-auto mb-4 h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                             </svg>
-                            <div class="mb-2 text-sm text-gray-500">Историй</div>
-                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">2,431</div>
+                            <div class="mb-2 text-sm text-gray-500">Страниц памяти</div>
+                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">{{ number_format($stats['memorials'], 0, ',', ' ') }}</div>
                         </div>
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                             <svg class="mx-auto mb-4 h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                             </svg>
                             <div class="mb-2 text-sm text-gray-500">Пользователей</div>
-                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">8,521</div>
+                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">{{ number_format($stats['users'], 0, ',', ' ') }}</div>
                         </div>
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                             <svg class="mx-auto mb-4 h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                             </svg>
                             <div class="mb-2 text-sm text-gray-500">Воспоминаний</div>
-                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">42,981</div>
+                            <div class="text-xl font-semibold leading-none text-slate-700 sm:text-2xl">{{ number_format($stats['memories'], 0, ',', ' ') }}</div>
                         </div>
                     </div>
                 </div>

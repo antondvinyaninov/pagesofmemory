@@ -6,6 +6,14 @@ use App\Http\Controllers\AuthController;
 use App\Models\Memorial;
 
 Route::get('/', function () {
+    // Статистика
+    $stats = [
+        'photos' => \DB::table('memorials')->sum(\DB::raw('(SELECT COUNT(*) FROM json_each(photos)) WHERE photos IS NOT NULL')),
+        'memories' => \App\Models\Memory::count(),
+        'users' => \App\Models\User::count(),
+        'memorials' => Memorial::where('status', 'published')->count(),
+    ];
+    
     $recentMemorials = Memorial::query()
         ->where('status', 'published')
         ->where(function ($query) {
@@ -18,7 +26,7 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
-    return view('welcome', compact('recentMemorials'));
+    return view('welcome', compact('recentMemorials', 'stats'));
 });
 
 Route::get('/sitemap.xml', function () {
