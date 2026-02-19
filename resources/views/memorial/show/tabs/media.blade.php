@@ -47,7 +47,7 @@
                 @if($memorialVideos->isNotEmpty())
                 <div>
                     <h5 class="text-sm font-medium text-slate-600 mb-2 sm:mb-3">Видео ({{ $memorialVideos->count() }})</h5>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach($memorialVideos as $video)
                         <div class="relative aspect-video rounded-lg overflow-hidden bg-gray-900">
                             <video
@@ -93,7 +93,7 @@
                 @if($memoryVideos->isNotEmpty())
                 <div>
                     <h5 class="text-sm font-medium text-slate-600 mb-2 sm:mb-3">Видео ({{ $memoryVideos->count() }})</h5>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach($memoryVideos as $video)
                         <div class="relative aspect-video rounded-lg overflow-hidden bg-gray-900">
                             <video
