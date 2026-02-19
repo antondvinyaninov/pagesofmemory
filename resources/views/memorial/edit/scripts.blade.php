@@ -489,8 +489,9 @@ function burialCityAutocomplete() {
             longitude: parseFloat('{{ old('burial_longitude', $memorial->burial_longitude ?? 37.618423) }}'),
             
             init() {
-                // Карта всегда скрыта по умолчанию
-                console.log('burialMap инициализирован, карта скрыта');
+                // Сохраняем ссылку на этот компонент глобально
+                window.burialMapInstance = this;
+                
                 // Проверяем, есть ли сохраненные координаты
                 const hasCoords = {{ $memorial->burial_latitude ? 'true' : 'false' }};
                 if (hasCoords) {
@@ -519,17 +520,8 @@ function burialCityAutocomplete() {
             },
             
             saveCoordinates() {
-                console.log('=== СОХРАНЕНИЕ КООРДИНАТ ===');
-                console.log('Широта:', this.latitude);
-                console.log('Долгота:', this.longitude);
-                console.log('Точность широты:', this.latitude.toString().length, 'символов');
-                console.log('Точность долготы:', this.longitude.toString().length, 'символов');
-                
                 document.getElementById('burial_latitude').value = this.latitude;
                 document.getElementById('burial_longitude').value = this.longitude;
-                
-                console.log('Значение в поле burial_latitude:', document.getElementById('burial_latitude').value);
-                console.log('Значение в поле burial_longitude:', document.getElementById('burial_longitude').value);
                 
                 this.hasManualCoordinates = true;
                 this.coordinatesSaved = true;
@@ -664,37 +656,20 @@ function burialCityAutocomplete() {
             },
             
             centerMapByCity() {
-                console.log('=== centerMapByCity вызван ===');
                 const burialCityInput = document.getElementById('burial_city_input')?.value || '';
                 const burialCityHidden = document.querySelector('input[name="burial_city"]')?.value || '';
-                
-                console.log('burial_city_input значение:', burialCityInput);
-                console.log('burial_city (скрытое поле) значение:', burialCityHidden);
-                
                 const burialCity = burialCityInput || burialCityHidden;
-                console.log('Используем город для центрирования:', burialCity);
                 
                 if (burialCity.length > 0) {
-                    console.log('Отправляем запрос геокодирования для:', burialCity);
                     ymaps.geocode(burialCity, {
                         results: 1
                     }).then(function(res) {
                         const firstGeoObject = res.geoObjects.get(0);
-                        console.log('Результат геокодирования:', firstGeoObject);
                         if (firstGeoObject) {
                             const coords = firstGeoObject.geometry.getCoordinates();
-                            console.log('Координаты найдены:', coords);
                             myMap.setCenter(coords, 12);
-                            console.log('Карта центрирована');
-                        } else {
-                            console.log('Геообъект не найден');
                         }
                     }).catch(function(error) {
-                        console.error('Ошибка геокодирования:', error);
-                    });
-                } else {
-                    console.log('Город не указан, центрирование пропущено');
-                }
             },
             
             async searchCemetery(query) {
@@ -744,15 +719,26 @@ function burialCityAutocomplete() {
             caption += '\n' + burialLocation;
         }
         
-        console.log('Создаем метку с текстом:', caption);
-        
-        return new ymaps.Placemark(coords, {
+        const placemark = new ymaps.Placemark(coords, {
             iconCaption: caption,
             balloonContent: `<strong>${fullName}</strong><br>${burialPlace}<br>${burialLocation}`
         }, {
             preset: 'islands#violetDotIconWithCaption',
             draggable: true
         });
+        
+        // Обработчик перетаскивания метки
+        placemark.events.add('dragend', function (e) {
+            const newCoords = e.get('target').geometry.getCoordinates();
+            
+            // Обновляем координаты в Alpine через глобальную функцию
+            if (window.burialMapInstance) {
+                window.burialMapInstance.latitude = newCoords[0];
+                window.burialMapInstance.longitude = newCoords[1];
+            }
+        });
+        
+        return placemark;
     }
 </script>
 

@@ -591,12 +591,8 @@ class MemorialController extends Controller
         // Логирование входящих данных
         \Log::info('=== НАЧАЛО ОБНОВЛЕНИЯ МЕМОРИАЛА ===');
         \Log::info('Memorial ID: ' . $id);
-        \Log::info('Все данные запроса:', $request->all());
         \Log::info('birth_place из запроса: ' . $request->input('birth_place'));
-        \Log::info('birth_place_input из запроса: ' . $request->input('birth_place_input'));
         \Log::info('burial_city из запроса: ' . $request->input('burial_city'));
-        \Log::info('burial_city_input из запроса: ' . $request->input('burial_city_input'));
-        \Log::info('=== КООРДИНАТЫ ===');
         \Log::info('burial_latitude из запроса: ' . $request->input('burial_latitude'));
         \Log::info('burial_longitude из запроса: ' . $request->input('burial_longitude'));
 
