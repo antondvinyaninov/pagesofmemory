@@ -2,17 +2,20 @@
 
 return [
     'required' => 'Поле :attribute обязательно для заполнения.',
-    'string' => 'Поле :attribute должно быть строкой.',
+    'string' => 'Поле :attribute должно содержать текст.',
     'max' => [
         'string' => 'Поле :attribute не может быть длиннее :max символов.',
     ],
     'date' => 'Поле :attribute должно быть корректной датой.',
+    'after' => 'Поле :attribute должно быть датой после :date.',
     'email' => 'Поле :attribute должно быть корректным email адресом.',
     'unique' => 'Такое значение поля :attribute уже существует.',
     'confirmed' => 'Поле :attribute не совпадает с подтверждением.',
     'min' => [
         'string' => 'Поле :attribute должно содержать минимум :min символов.',
     ],
+    'image' => 'Поле :attribute должно быть изображением.',
+    'in' => 'Выбранное значение для :attribute некорректно.',
     
     'attributes' => [
         'first_name' => 'имя',
