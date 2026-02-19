@@ -29,6 +29,7 @@ return [
         'religion' => 'религия',
         'privacy' => 'приватность',
         'creator_relationship' => 'ваше отношение к усопшему',
+        'creator_relationship_custom' => 'уточнение отношения',
         'email' => 'email',
         'password' => 'пароль',
         'name' => 'имя',
