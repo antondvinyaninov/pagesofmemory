@@ -596,6 +596,9 @@ class MemorialController extends Controller
         \Log::info('birth_place_input из запроса: ' . $request->input('birth_place_input'));
         \Log::info('burial_city из запроса: ' . $request->input('burial_city'));
         \Log::info('burial_city_input из запроса: ' . $request->input('burial_city_input'));
+        \Log::info('=== КООРДИНАТЫ ===');
+        \Log::info('burial_latitude из запроса: ' . $request->input('burial_latitude'));
+        \Log::info('burial_longitude из запроса: ' . $request->input('burial_longitude'));
 
         $validated = $request->validate([
             'last_name' => ['required', 'string', 'max:255'],
