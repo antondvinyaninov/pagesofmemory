@@ -8,7 +8,11 @@ use App\Models\Memorial;
 Route::get('/', function () {
     // Статистика
     $stats = [
-        'photos' => \DB::table('memorials')->sum(\DB::raw('(SELECT COUNT(*) FROM json_each(photos)) WHERE photos IS NOT NULL')),
+        'photos' => \DB::table('memorials')
+            ->whereNotNull('photos')
+            ->where('photos', '!=', '[]')
+            ->selectRaw('SUM(json_array_length(photos::json)) as total')
+            ->value('total') ?? 0,
         'memories' => \App\Models\Memory::count(),
         'users' => \App\Models\User::count(),
         'memorials' => Memorial::where('status', 'published')->count(),
