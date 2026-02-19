@@ -483,8 +483,8 @@ function burialCityAutocomplete() {
         return {
             mapVisible: false,
             mapInitialized: false,
-            latitude: {{ old('burial_latitude', $memorial->burial_latitude ?? 55.751244) }},
-            longitude: {{ old('burial_longitude', $memorial->burial_longitude ?? 37.618423) }},
+            latitude: parseFloat('{{ old('burial_latitude', $memorial->burial_latitude ?? 55.751244) }}'),
+            longitude: parseFloat('{{ old('burial_longitude', $memorial->burial_longitude ?? 37.618423) }}'),
             
             init() {
                 // Карта всегда скрыта по умолчанию
