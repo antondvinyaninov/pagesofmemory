@@ -34,7 +34,14 @@ COPY . /var/www
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-RUN npm ci && npm run build
+
+# Build frontend assets
+RUN npm ci --prefer-offline --no-audit
+RUN npm run build
+
+# Ensure build directory exists and has correct permissions
+RUN mkdir -p /var/www/public/build && \
+    chown -R www-data:www-data /var/www/public/build
 
 # Configure Nginx
 RUN echo 'server {\n\
