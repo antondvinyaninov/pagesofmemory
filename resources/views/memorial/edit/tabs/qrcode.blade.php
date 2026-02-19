@@ -161,7 +161,7 @@
                         <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
                         <script>
                             let qrcode = null;
-                            const currentSize = 256; // Фиксированный средний размер
+                            const currentSize = 256;
                             const memorialUrl = '{{ route('memorial.show', $memorial->id) }}';
 
                             function generateQR(size) {
@@ -258,16 +258,16 @@
                                 }
                             }
 
+                            @verbatim
                             function generateQRSVG(text, size) {
-                                // Используем библиотеку для генерации QR-кода
                                 const qr = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.HIGH);
                                 const border = 4;
                                 const moduleSize = size / (qr.size + border * 2);
                                 
-                                let svg = '<?xml version="1.0" encoding="UTF-8"?>' +
-'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + size + ' ' + size + '" stroke="none">' +
-'<rect width="100%" height="100%" fill="#ffffff"/>' +
-'<path d="';
+                                let svg = '<?xml version="1.0" encoding="UTF-8"?>';
+                                svg += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + size + ' ' + size + '" stroke="none">';
+                                svg += '<rect width="100%" height="100%" fill="#ffffff"/>';
+                                svg += '<path d="';
                                 
                                 for (let y = 0; y < qr.size; y++) {
                                     for (let x = 0; x < qr.size; x++) {
@@ -282,6 +282,7 @@
                                 svg += '" fill="#000000"/></svg>';
                                 return svg;
                             }
+                            @endverbatim
 
                             function printQR() {
                                 const canvas = document.querySelector('#qrcode canvas');
