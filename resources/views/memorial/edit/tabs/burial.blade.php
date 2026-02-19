@@ -126,11 +126,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Скрытые поля для координат -->
-                                <input type="hidden" name="burial_latitude" id="burial_latitude" :value="latitude">
-                                <input type="hidden" name="burial_longitude" id="burial_longitude" :value="longitude">
                             </div>
+                            
+                            <!-- Скрытые поля для координат (вне Alpine компонента) -->
+                            <input type="hidden" name="burial_latitude" id="burial_latitude" value="{{ old('burial_latitude', $memorial->burial_latitude) }}">
+                            <input type="hidden" name="burial_longitude" id="burial_longitude" value="{{ old('burial_longitude', $memorial->burial_longitude) }}">
 
                             <!-- Блок: Фото места захоронения -->
                             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100" x-data="burialPhotos()">

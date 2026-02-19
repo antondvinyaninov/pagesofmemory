@@ -484,12 +484,18 @@ function burialCityAutocomplete() {
             mapVisible: false,
             mapInitialized: false,
             coordinatesSaved: false,
+            hasManualCoordinates: false,
             latitude: parseFloat('{{ old('burial_latitude', $memorial->burial_latitude ?? 55.751244) }}'),
             longitude: parseFloat('{{ old('burial_longitude', $memorial->burial_longitude ?? 37.618423) }}'),
             
             init() {
                 // Карта всегда скрыта по умолчанию
                 console.log('burialMap инициализирован, карта скрыта');
+                // Проверяем, есть ли сохраненные координаты
+                const hasCoords = {{ $memorial->burial_latitude ? 'true' : 'false' }};
+                if (hasCoords) {
+                    this.hasManualCoordinates = true;
+                }
             },
             
             showMap() {
@@ -501,8 +507,10 @@ function burialCityAutocomplete() {
                         this.initMap();
                     });
                 } else {
-                    // Если карта уже инициализирована, центрируем по городу
-                    this.centerMapByCity();
+                    // Если карта уже инициализирована и НЕТ ручных координат, центрируем по городу
+                    if (!this.hasManualCoordinates) {
+                        this.centerMapByCity();
+                    }
                 }
             },
             
@@ -511,9 +519,19 @@ function burialCityAutocomplete() {
             },
             
             saveCoordinates() {
-                console.log('Сохранение координат:', this.latitude, this.longitude);
+                console.log('=== СОХРАНЕНИЕ КООРДИНАТ ===');
+                console.log('Широта:', this.latitude);
+                console.log('Долгота:', this.longitude);
+                console.log('Точность широты:', this.latitude.toString().length, 'символов');
+                console.log('Точность долготы:', this.longitude.toString().length, 'символов');
+                
                 document.getElementById('burial_latitude').value = this.latitude;
                 document.getElementById('burial_longitude').value = this.longitude;
+                
+                console.log('Значение в поле burial_latitude:', document.getElementById('burial_latitude').value);
+                console.log('Значение в поле burial_longitude:', document.getElementById('burial_longitude').value);
+                
+                this.hasManualCoordinates = true;
                 this.coordinatesSaved = true;
                 
                 setTimeout(() => {
