@@ -33,12 +33,36 @@ class StorageService
                 throw new \Exception('Не удалось конвертировать HEIC: ' . $e->getMessage());
             }
         } else {
-            // Обычное изображение
-            $image = imagecreatefromstring(file_get_contents($file));
+            // Обычное изображение - определяем тип по MIME
+            $fileContent = file_get_contents($file);
+            
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $image = imagecreatefromjpeg($file->getRealPath());
+                    break;
+                case 'image/png':
+                    $image = imagecreatefrompng($file->getRealPath());
+                    break;
+                case 'image/gif':
+                    $image = imagecreatefromgif($file->getRealPath());
+                    break;
+                case 'image/webp':
+                    $image = imagecreatefromwebp($file->getRealPath());
+                    break;
+                case 'image/bmp':
+                case 'image/x-ms-bmp':
+                    $image = imagecreatefrombmp($file->getRealPath());
+                    break;
+                default:
+                    // Пробуем универсальный метод
+                    $image = imagecreatefromstring($fileContent);
+                    break;
+            }
         }
         
         if (!$image) {
-            throw new \Exception('Не удалось загрузить изображение');
+            throw new \Exception('Не удалось загрузить изображение. Формат: ' . $mimeType);
         }
         
         // Получаем размеры оригинала
