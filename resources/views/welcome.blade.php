@@ -35,7 +35,7 @@
                         <div class="mx-auto mt-7 max-w-3xl rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm sm:mt-8 sm:p-5">
                             <p class="mb-4 text-center text-sm text-slate-200 sm:text-base">Создайте страницу памяти и пригласите родных делиться воспоминаниями</p>
                             <div class="flex flex-col justify-center gap-3 sm:flex-row">
-                                <a href="/register" class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-lg">
+                                <a href="/login#register" class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-500 px-5 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-lg">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                                     </svg>
