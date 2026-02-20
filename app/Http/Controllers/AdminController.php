@@ -90,6 +90,49 @@ class AdminController extends Controller
         return back()->with('success', 'Пользователь удален');
     }
     
+    public function convertUserToMemorial($id)
+    {
+        // Проверка прав доступа
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            abort(403, 'Доступ запрещен');
+        }
+        
+        $user = User::findOrFail($id);
+        
+        if ($user->role === 'admin') {
+            return back()->with('error', 'Нельзя перевести администратора в статус памяти');
+        }
+        
+        if ($user->is_memorial) {
+            return back()->with('error', 'Пользователь уже в статусе памяти');
+        }
+        
+        // Создаем мемориал для пользователя
+        $memorial = Memorial::create([
+            'user_id' => $user->id,
+            'first_name' => explode(' ', $user->name)[0] ?? '',
+            'last_name' => explode(' ', $user->name)[1] ?? '',
+            'middle_name' => explode(' ', $user->name)[2] ?? null,
+            'birth_date' => now()->subYears(50), // Примерная дата, нужно будет уточнить
+            'death_date' => now(),
+            'photo' => $user->avatar,
+            'status' => 'published',
+            'privacy' => 'public',
+        ]);
+        
+        // Обновляем пользователя
+        $user->update([
+            'is_memorial' => true,
+            'memorial_id' => $memorial->id,
+        ]);
+        
+        // Очищаем кеш
+        cache()->forget('admin_stats');
+        cache()->flush();
+        
+        return back()->with('success', 'Пользователь переведен в статус памяти. Мемориал создан.');
+    }
+    
     public function deleteMemorial($id)
     {
         // Проверка прав доступа

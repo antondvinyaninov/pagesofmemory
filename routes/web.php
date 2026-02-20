@@ -104,6 +104,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/settings', [App\Http\Controllers\AdminController::class, 'settings'])->name('admin.settings');
     Route::post('/settings', [App\Http\Controllers\AdminController::class, 'updateSettings'])->name('admin.settings.update');
     Route::delete('/users/{id}', [App\Http\Controllers\AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/users/{id}/convert-to-memorial', [App\Http\Controllers\AdminController::class, 'convertUserToMemorial'])->name('admin.users.convert');
     Route::delete('/memorials/{id}', [App\Http\Controllers\AdminController::class, 'deleteMemorial'])->name('admin.memorials.delete');
 });
 
