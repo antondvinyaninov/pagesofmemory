@@ -26,7 +26,7 @@
                             <h1 style="margin:0 0 12px;font-size:22px;">Новое воспоминание</h1>
                             <p style="margin:0 0 12px;line-height:1.6;">
                                 На странице памяти
-                                <strong>{{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}</strong>
+                                <strong>{{ $memorial->last_name }} {{ $memorial->first_name }} {{ $memorial->middle_name }}</strong>
                                 опубликовано новое воспоминание.
                             </p>
                             <p style="margin:0 0 20px;line-height:1.6;">

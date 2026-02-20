@@ -196,9 +196,9 @@
                             @foreach($recentMemorials as $memorial)
                                 @php
                                     $fullName = trim(implode(' ', array_filter([
+                                        $memorial->last_name,
                                         $memorial->first_name,
                                         $memorial->middle_name,
-                                        $memorial->last_name,
                                     ])));
 
                                     if ($fullName === '') {

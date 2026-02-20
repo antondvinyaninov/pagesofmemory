@@ -28,7 +28,7 @@
                                 {{ $user->name }}, вы создали страницу памяти:
                             </p>
                             <p style="margin:0 0 16px;font-weight:700;">
-                                {{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}
+                                {{ $memorial->last_name }} {{ $memorial->first_name }} {{ $memorial->middle_name }}
                             </p>
                             <p style="margin:0 0 20px;line-height:1.6;">
                                 Текущий статус: <strong>{{ $memorial->status === 'published' ? 'Опубликован' : 'Черновик' }}</strong>.

@@ -29,7 +29,7 @@
                             </p>
                             @if($memory->memorial)
                                 <p style="margin:0 0 20px;line-height:1.6;">
-                                    Мемориал: <strong>{{ $memory->memorial->first_name }} {{ $memory->memorial->last_name }}</strong>
+                                    Мемориал: <strong>{{ $memory->memorial->last_name }} {{ $memory->memorial->first_name }}</strong>
                                 </p>
                                 <a href="{{ route('memorial.show', ['id' => $memory->memorial->id]) }}" style="display:inline-block;background:#ef4444;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600;">
                                     Открыть страницу

@@ -24,7 +24,7 @@
                             <td class="px-4 sm:px-6 py-4 text-sm text-gray-900">{{ $memorial->id }}</td>
                             <td class="px-4 sm:px-6 py-4 text-sm text-gray-900">
                                 <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" class="text-blue-600 hover:underline">
-                                    {{ $memorial->first_name }} {{ $memorial->last_name }}
+                                    {{ $memorial->last_name }} {{ $memorial->first_name }}
                                 </a>
                             </td>
                             <td class="px-4 sm:px-6 py-4 text-sm text-gray-500 hidden lg:table-cell">

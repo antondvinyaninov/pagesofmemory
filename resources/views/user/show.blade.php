@@ -57,7 +57,7 @@
                                                 <!-- Информация -->
                                                 <div class="flex-1 min-w-0 text-center md:text-left">
                                                     <h3 class="text-2xl md:text-3xl font-bold mb-3 leading-tight break-words">
-                                                        {{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}
+                                                        {{ $memorial->last_name }} {{ $memorial->first_name }} {{ $memorial->middle_name }}
                                                     </h3>
                                                     
                                                     <!-- Даты жизни -->

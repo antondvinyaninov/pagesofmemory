@@ -28,7 +28,7 @@
                                 {{ $user->name }}, ваш мемориал опубликован и доступен для просмотра.
                             </p>
                             <p style="margin:0 0 20px;font-weight:700;">
-                                {{ $memorial->first_name }} {{ $memorial->middle_name }} {{ $memorial->last_name }}
+                                {{ $memorial->last_name }} {{ $memorial->first_name }} {{ $memorial->middle_name }}
                             </p>
                             <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" style="display:inline-block;background:#ef4444;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600;">
                                 Открыть мемориал

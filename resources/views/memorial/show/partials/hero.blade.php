@@ -1,5 +1,5 @@
 @php
-    $fullName = trim(implode(' ', array_filter([$memorial->first_name, $memorial->middle_name, $memorial->last_name])));
+    $fullName = trim(implode(' ', array_filter([$memorial->last_name, $memorial->first_name, $memorial->middle_name])));
     $memoryCount = isset($memories) && is_countable($memories)
         ? count($memories)
         : (int) ($memorial->memories_count ?? 0);

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $memorial->first_name . ' ' . $memorial->last_name . ' - Страница памяти')
+@section('title', $memorial->last_name . ' ' . $memorial->first_name . ' - Страница памяти')
 
 @section('content')
 <div class="min-h-screen bg-slate-100 pt-4 sm:pt-6" x-data="{ activeTab: 'memories' }">
