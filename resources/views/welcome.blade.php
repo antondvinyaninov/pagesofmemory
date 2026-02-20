@@ -231,7 +231,7 @@
                                     };
                                 @endphp
 
-                                <article class="relative overflow-hidden rounded-xl bg-slate-700 shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                                <article class="relative overflow-hidden rounded-xl bg-slate-700 shadow-xl transition-shadow duration-300 hover:shadow-2xl group">
                                     <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" class="block">
                                         <div class="relative aspect-[4/3] bg-slate-600 overflow-hidden">
                                             @if($photoUrl)
