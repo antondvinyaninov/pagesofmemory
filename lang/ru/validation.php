@@ -12,6 +12,7 @@ return [
     'email' => 'Поле :attribute должно быть корректным email адресом.',
     'unique' => 'Такое значение поля :attribute уже существует.',
     'confirmed' => 'Поле :attribute не совпадает с подтверждением.',
+    'accepted' => 'Вы должны принять :attribute.',
     'min' => [
         'string' => 'Поле :attribute должно содержать минимум :min символов.',
     ],
@@ -31,6 +32,7 @@ return [
         'privacy' => 'приватность',
         'creator_relationship' => 'ваше отношение к усопшему',
         'creator_relationship_custom' => 'уточнение отношения',
+        'confirm_responsibility' => 'подтверждение ответственности',
         'email' => 'email',
         'password' => 'пароль',
         'name' => 'имя',

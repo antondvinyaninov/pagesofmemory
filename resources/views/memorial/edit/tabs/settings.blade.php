@@ -1,4 +1,21 @@
                         <div x-show="activeTab === 'settings'" class="space-y-6">
+                            @if(!$memorial->exists)
+                            <div class="p-5 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                                <h4 class="text-base font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    Подтверждение ответственности
+                                </h4>
+                                <label class="flex items-start gap-3 cursor-pointer">
+                                    <input type="checkbox" name="confirm_responsibility" required class="mt-1 w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                    <span class="text-sm text-gray-800 leading-relaxed">
+                                        Я подтверждаю, что являюсь родственником или близким человеком усопшего, и беру на себя ответственность за достоверность предоставленной информации. Я подтверждаю факт смерти данного человека.
+                                    </span>
+                                </label>
+                            </div>
+                            @endif
+
                             <div>
                                 <h4 class="text-base font-semibold text-slate-700 mb-3">Приватность</h4>
                                 <p class="text-sm text-gray-600 mb-4">Выберите, кто может видеть этот мемориал</p>

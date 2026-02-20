@@ -457,6 +457,7 @@ class MemorialController extends Controller
             'privacy' => ['required', 'string', 'in:public,family,private'],
             'moderate_memories' => ['nullable', 'boolean'],
             'allow_comments' => ['nullable', 'boolean'],
+            'confirm_responsibility' => ['required', 'accepted'],
             'full_biography' => ['nullable', 'string'],
             'education' => ['nullable', 'array', 'max:5'],
             'education.*.name' => ['nullable', 'string', 'max:255'],
