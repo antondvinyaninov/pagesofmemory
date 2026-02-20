@@ -220,3 +220,42 @@ if (!function_exists('project_email_icon_url')) {
         return asset('brand/memory-icon.png');
     }
 }
+
+if (!function_exists('user_profile_url')) {
+    /**
+     * Возвращает URL профиля пользователя или его мемориала (если умер)
+     * 
+     * @param int $userId
+     * @return string
+     */
+    function user_profile_url(int $userId): string
+    {
+        $user = \App\Models\User::find($userId);
+        
+        if (!$user) {
+            return '#';
+        }
+        
+        // Если пользователь умер и у него есть мемориал - ведем на мемориал
+        if ($user->is_memorial && $user->memorial_id) {
+            return route('memorial.show', ['id' => $user->memorial_id]);
+        }
+        
+        // Иначе ведем на профиль пользователя
+        return route('user.show', ['id' => $userId]);
+    }
+}
+
+if (!function_exists('is_user_memorial')) {
+    /**
+     * Проверяет, является ли пользователь мемориалом (умер)
+     * 
+     * @param int $userId
+     * @return bool
+     */
+    function is_user_memorial(int $userId): bool
+    {
+        $user = \App\Models\User::find($userId);
+        return $user ? $user->is_memorial : false;
+    }
+}

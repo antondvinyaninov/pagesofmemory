@@ -182,7 +182,7 @@
         <!-- Заголовок воспоминания -->
         <div class="flex items-center justify-between px-3 sm:px-4 py-3">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                <a href="{{ route('user.show', ['id' => $memory['author_id']]) }}" class="flex-shrink-0">
+                <a href="{{ user_profile_url($memory['author_id']) }}" class="flex-shrink-0">
                     <img 
                         src="{{ $memory['author_avatar'] }}" 
                         alt="{{ $memory['author_name'] }}"
@@ -191,8 +191,11 @@
                 </a>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
-                        <a href="{{ route('user.show', ['id' => $memory['author_id']]) }}" class="hover:underline min-w-0">
+                        <a href="{{ user_profile_url($memory['author_id']) }}" class="hover:underline min-w-0 flex items-center gap-1">
                             <h4 class="font-semibold text-slate-700 text-sm sm:text-base truncate">{{ $memory['author_name'] }}</h4>
+                            @if(is_user_memorial($memory['author_id']))
+                                <span class="text-base" title="Светлая память">🕊️</span>
+                            @endif
                         </a>
                         @if(isset($memory['author_relationship']))
                             <span class="text-xs sm:text-sm text-sky-600 font-medium whitespace-nowrap">• {{ $memory['author_relationship'] }}</span>
@@ -370,7 +373,7 @@
                 @if($memoryCommentsCount > 0)
                 @foreach($memoryComments as $commentIndex => $comment)
             <div x-show="showAllComments || {{ $commentIndex }} < 3" class="flex gap-3">
-                <a href="{{ route('user.show', ['id' => $comment['author_id']]) }}" class="flex-shrink-0">
+                <a href="{{ user_profile_url($comment['author_id']) }}" class="flex-shrink-0">
                     <img 
                         src="{{ $comment['author_avatar'] }}" 
                         alt="{{ $comment['author_name'] }}"
@@ -379,8 +382,11 @@
                 </a>
                 <div class="flex-1 min-w-0">
                     <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
-                        <a href="{{ route('user.show', ['id' => $comment['author_id']]) }}" class="hover:underline">
+                        <a href="{{ user_profile_url($comment['author_id']) }}" class="hover:underline flex items-center gap-1">
                             <h5 class="font-semibold text-slate-700 text-sm mb-1">{{ $comment['author_name'] }}</h5>
+                            @if(is_user_memorial($comment['author_id']))
+                                <span class="text-sm" title="Светлая память">🕊️</span>
+                            @endif
                         </a>
                         <p class="text-slate-600 text-xs leading-relaxed">{{ $comment['content'] }}</p>
                     </div>

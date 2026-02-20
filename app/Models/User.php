@@ -28,6 +28,8 @@ class User extends Authenticatable
         'profile_type',
         'show_email',
         'show_memorials',
+        'is_memorial',
+        'memorial_id',
     ];
 
     /**
@@ -50,7 +52,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_memorial' => 'boolean',
         ];
+    }
+
+    public function memorial()
+    {
+        return $this->belongsTo(Memorial::class);
     }
 
     public function memorials()
