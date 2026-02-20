@@ -37,7 +37,7 @@
 
             <div class="relative z-10 px-4 pb-5 pt-16 sm:px-7 sm:pb-7 sm:pt-20 lg:px-8 lg:py-8">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-10">
-                    <div class="mx-auto h-[22rem] w-[22rem] overflow-hidden rounded-2xl border border-white/20 bg-slate-500/20 shadow-lg sm:h-[22rem] sm:w-[22rem] lg:mx-0 lg:h-64 lg:w-64">
+                    <div class="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-white/20 bg-slate-500/20 shadow-lg aspect-square sm:h-[22rem] sm:w-[22rem] lg:mx-0 lg:h-64 lg:w-64">
                         <img
                             src="{{ $memorial->photo ? Storage::url($memorial->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($memorial->first_name . ' ' . $memorial->last_name) . '&size=300&background=e5e7eb&color=6b7280&bold=true' }}"
                             alt="{{ $memorial->first_name }} {{ $memorial->last_name }}"
