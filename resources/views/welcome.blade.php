@@ -233,7 +233,7 @@
 
                                 <article class="relative overflow-hidden rounded-xl bg-slate-700 shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                                     <a href="{{ route('memorial.show', ['id' => $memorial->id]) }}" class="block">
-                                        <div class="relative aspect-[4/3] bg-slate-600">
+                                        <div class="relative aspect-[4/3] bg-slate-600 overflow-hidden">
                                             @if($photoUrl)
                                                 <img src="{{ $photoUrl }}" alt="{{ $fullName }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                             @else
