@@ -27,7 +27,7 @@ class StorageService
                 $heicToJpg->convert($heicPath)->saveAs($jpgPath);
                 
                 // Теперь конвертируем JPG в WebP
-                $image = imagecreatefromjpeg($jpgPath);
+                $image = \imagecreatefromjpeg($jpgPath);
                 unlink($jpgPath); // Удаляем временный JPG
             } catch (\Exception $e) {
                 throw new \Exception('Не удалось конвертировать HEIC: ' . $e->getMessage());
@@ -39,24 +39,24 @@ class StorageService
             switch ($mimeType) {
                 case 'image/jpeg':
                 case 'image/jpg':
-                    $image = imagecreatefromjpeg($file->getRealPath());
+                    $image = \imagecreatefromjpeg($file->getRealPath());
                     break;
                 case 'image/png':
-                    $image = imagecreatefrompng($file->getRealPath());
+                    $image = \imagecreatefrompng($file->getRealPath());
                     break;
                 case 'image/gif':
-                    $image = imagecreatefromgif($file->getRealPath());
+                    $image = \imagecreatefromgif($file->getRealPath());
                     break;
                 case 'image/webp':
-                    $image = imagecreatefromwebp($file->getRealPath());
+                    $image = \imagecreatefromwebp($file->getRealPath());
                     break;
                 case 'image/bmp':
                 case 'image/x-ms-bmp':
-                    $image = imagecreatefrombmp($file->getRealPath());
+                    $image = \imagecreatefrombmp($file->getRealPath());
                     break;
                 default:
                     // Пробуем универсальный метод
-                    $image = imagecreatefromstring($fileContent);
+                    $image = \imagecreatefromstring($fileContent);
                     break;
             }
         }
@@ -66,8 +66,8 @@ class StorageService
         }
         
         // Получаем размеры оригинала
-        $originalWidth = imagesx($image);
-        $originalHeight = imagesy($image);
+        $originalWidth = \imagesx($image);
+        $originalHeight = \imagesy($image);
         
         // Если заданы максимальные размеры, ресайзим
         if ($maxWidth || $maxHeight) {
@@ -88,9 +88,9 @@ class StorageService
             }
             
             // Создаем новое изображение с нужными размерами
-            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-            imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
-            imagedestroy($image);
+            $resizedImage = \imagecreatetruecolor($newWidth, $newHeight);
+            \imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+            \imagedestroy($image);
             $image = $resizedImage;
         }
         
@@ -98,8 +98,8 @@ class StorageService
         $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.webp';
         
         // Конвертируем в WebP с качеством 85%
-        imagewebp($image, $tempPath, 85);
-        imagedestroy($image);
+        \imagewebp($image, $tempPath, 85);
+        \imagedestroy($image);
         
         $webpContent = file_get_contents($tempPath);
         unlink($tempPath);
