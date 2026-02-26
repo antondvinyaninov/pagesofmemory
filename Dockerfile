@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
     zip \
     unzip \
     nginx \
@@ -19,7 +20,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
 # Configure PHP for large uploads
