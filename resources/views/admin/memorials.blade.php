@@ -4,6 +4,22 @@
 
 @section('content')
 <div class="p-4 sm:p-6 lg:p-8">
+    <!-- Фильтр по статусу -->
+    <div class="mb-4 flex gap-2">
+        <a href="{{ route('admin.memorials', ['status' => 'all']) }}" 
+           class="px-4 py-2 rounded {{ request('status', 'all') === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            Все
+        </a>
+        <a href="{{ route('admin.memorials', ['status' => 'published']) }}" 
+           class="px-4 py-2 rounded {{ request('status') === 'published' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            Опубликованные
+        </a>
+        <a href="{{ route('admin.memorials', ['status' => 'draft']) }}" 
+           class="px-4 py-2 rounded {{ request('status') === 'draft' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+            Черновики
+        </a>
+    </div>
+
     <!-- Таблица мемориалов -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">

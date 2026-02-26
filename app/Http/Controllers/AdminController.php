@@ -59,10 +59,17 @@ class AdminController extends Controller
         }
         
         $page = request()->get('page', 1);
+        $status = request()->get('status', 'all');
         
         // Кешируем список мемориалов на 2 минуты
-        $memorials = cache()->remember("admin_memorials_page_{$page}", 120, function () {
-            return Memorial::with('user')->latest()->paginate(20);
+        $memorials = cache()->remember("admin_memorials_page_{$page}_status_{$status}", 120, function () use ($status) {
+            $query = Memorial::with('user');
+            
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+            
+            return $query->latest()->paginate(20);
         });
         
         return view('admin.memorials', compact('memorials'));
@@ -158,6 +165,22 @@ class AdminController extends Controller
         }
         
         return view('admin.analytics');
+    }
+    
+    public function updateAnalytics(Request $request)
+    {
+        // Проверка прав доступа
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            abort(403, 'Доступ запрещен');
+        }
+        
+        $validated = $request->validate([
+            'gtm_id' => ['nullable', 'string', 'regex:/^GTM-[A-Z0-9]+$/'],
+        ]);
+        
+        AppSetting::set('analytics.gtm_id', $validated['gtm_id'] ?? '');
+        
+        return back()->with('success', 'Настройки аналитики сохранены');
     }
     
     public function seo()

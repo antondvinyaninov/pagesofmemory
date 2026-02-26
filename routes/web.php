@@ -97,6 +97,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
     Route::get('/memorials', [App\Http\Controllers\AdminController::class, 'memorials'])->name('admin.memorials');
     Route::get('/analytics', [App\Http\Controllers\AdminController::class, 'analytics'])->name('admin.analytics');
+    Route::post('/analytics', [App\Http\Controllers\AdminController::class, 'updateAnalytics'])->name('admin.analytics.update');
     Route::get('/seo', [App\Http\Controllers\AdminController::class, 'seo'])->name('admin.seo');
     Route::get('/newsletter', [App\Http\Controllers\AdminController::class, 'newsletter'])->name('admin.newsletter');
     Route::post('/newsletter/test', [App\Http\Controllers\AdminController::class, 'sendNewsletterTest'])->name('admin.newsletter.test');
