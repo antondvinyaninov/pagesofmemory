@@ -28,168 +28,167 @@ class MemorialController extends Controller
             abort(403, $this->getMemorialAccessDeniedMessage($memorial));
         }
 
-            $isOwner = auth()->check() && $memorial->user_id === auth()->id();
+        $isOwner = auth()->check() && $memorial->user_id === auth()->id();
 
-            // Увеличиваем счетчик просмотров мемориала (не для владельца)
-            if (!$isOwner) {
-                $memorial->increment('views');
-            }
+        // Увеличиваем счетчик просмотров мемориала (не для владельца)
+        if (!$isOwner) {
+            $memorial->increment('views');
+        }
 
-            $memoriesCollection = $this->applyMemorySort($memorial->memories, $memorySort);
+        $memoriesCollection = $this->applyMemorySort($memorial->memories, $memorySort);
 
-            // Получаем воспоминания с информацией о связи автора
-            $userId = auth()->id();
+        // Получаем воспоминания с информацией о связи автора
+        $userId = auth()->id();
+        
+        // Предзагружаем все связи для авторов воспоминаний
+        $memoryUserIds = $memoriesCollection->pluck('user_id')->unique();
+        $relationships = \App\Models\Relationship::where('memorial_id', $memorial->id)
+            ->whereIn('user_id', $memoryUserIds)
+            ->get()
+            ->keyBy('user_id');
+        
+        // Предзагружаем лайки пользователя
+        $memoryIds = $memoriesCollection->pluck('id');
+        $userMemoryLikes = $userId ? \DB::table('memory_likes')
+            ->where('user_id', $userId)
+            ->whereIn('memory_id', $memoryIds)
+            ->pluck('memory_id')
+            ->flip()
+            ->toArray() : [];
+        
+        // Предзагружаем комментарии с пользователями
+        $allComments = \App\Models\Comment::with('user')
+            ->whereIn('memory_id', $memoryIds)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('memory_id');
+        
+        // Предзагружаем лайки комментариев пользователя
+        $commentIds = $allComments->flatten()->pluck('id');
+        $userCommentLikes = $userId && $commentIds->isNotEmpty() ? \DB::table('comment_likes')
+            ->where('user_id', $userId)
+            ->whereIn('comment_id', $commentIds)
+            ->pluck('comment_id')
+            ->flip()
+            ->toArray() : [];
+        
+        // Предзагружаем информацию о комментариях пользователя
+        $userCommentMemories = $userId && $commentIds->isNotEmpty() ? \App\Models\Comment::where('user_id', $userId)
+            ->whereIn('memory_id', $memoryIds)
+            ->pluck('memory_id')
+            ->flip()
+            ->toArray() : [];
+        
+        $memories = $memoriesCollection->map(function($memory) use ($userId, $relationships, $userMemoryLikes, $allComments, $userCommentLikes, $userCommentMemories) {
+            $relationship = $relationships->get($memory->user_id);
             
-            // Предзагружаем все связи для авторов воспоминаний
-            $memoryUserIds = $memoriesCollection->pluck('user_id')->unique();
-            $relationships = \App\Models\Relationship::where('memorial_id', $memorial->id)
-                ->whereIn('user_id', $memoryUserIds)
-                ->get()
-                ->keyBy('user_id');
+            // Проверяем, лайкнул ли текущий пользователь это воспоминание
+            $userLiked = isset($userMemoryLikes[$memory->id]);
             
-            // Предзагружаем лайки пользователя
-            $memoryIds = $memoriesCollection->pluck('id');
-            $userMemoryLikes = $userId ? \DB::table('memory_likes')
-                ->where('user_id', $userId)
-                ->whereIn('memory_id', $memoryIds)
-                ->pluck('memory_id')
-                ->flip()
-                ->toArray() : [];
-            
-            // Предзагружаем комментарии с пользователями
-            $allComments = \App\Models\Comment::with('user')
-                ->whereIn('memory_id', $memoryIds)
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->groupBy('memory_id');
-            
-            // Предзагружаем лайки комментариев пользователя
-            $commentIds = $allComments->flatten()->pluck('id');
-            $userCommentLikes = $userId && $commentIds->isNotEmpty() ? \DB::table('comment_likes')
-                ->where('user_id', $userId)
-                ->whereIn('comment_id', $commentIds)
-                ->pluck('comment_id')
-                ->flip()
-                ->toArray() : [];
-            
-            // Предзагружаем информацию о комментариях пользователя
-            $userCommentMemories = $userId && $commentIds->isNotEmpty() ? \App\Models\Comment::where('user_id', $userId)
-                ->whereIn('memory_id', $memoryIds)
-                ->pluck('memory_id')
-                ->flip()
-                ->toArray() : [];
-            
-            $memories = $memoriesCollection->map(function($memory) use ($userId, $relationships, $userMemoryLikes, $allComments, $userCommentLikes, $userCommentMemories) {
-                $relationship = $relationships->get($memory->user_id);
-                
-                // Проверяем, лайкнул ли текущий пользователь это воспоминание
-                $userLiked = isset($userMemoryLikes[$memory->id]);
-                
-                // Загружаем комментарии
-                $memoryComments = $allComments->get($memory->id, collect());
-                $comments = $memoryComments->map(function($comment) use ($userCommentLikes) {
-                    $commentLiked = isset($userCommentLikes[$comment->id]);
-                    
-                    return [
-                        'id' => $comment->id,
-                        'author_id' => $comment->user->id,
-                        'author_name' => $comment->user->name,
-                        'author_avatar' => $comment->user->avatar ? \Storage::disk('s3')->url($comment->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&size=128&background=f3e5f5&color=7b1fa2&bold=true',
-                        'content' => $comment->content,
-                        'created_at' => $comment->created_at->toDateTimeString(),
-                        'likes' => $comment->likes ?? 0,
-                        'user_liked' => $commentLiked,
-                    ];
-                })->toArray();
-                
-                // Проверяем, есть ли у пользователя комментарий к этому воспоминанию
-                $userHasComment = isset($userCommentMemories[$memory->id]);
+            // Загружаем комментарии
+            $memoryComments = $allComments->get($memory->id, collect());
+            $comments = $memoryComments->map(function($comment) use ($userCommentLikes) {
+                $commentLiked = isset($userCommentLikes[$comment->id]);
                 
                 return [
-                    'id' => $memory->id,
-                    'author_id' => $memory->user->id,
-                    'author_name' => $memory->user->name,
-                    'author_avatar' => $memory->user->avatar ? \Storage::disk('s3')->url($memory->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($memory->user->name) . '&size=128&background=e3f2fd&color=1976d2&bold=true',
-                    'author_relationship' => $relationship ? $this->getRelationshipLabel($relationship) : null,
-                    'content' => $memory->content,
-                    'photos' => $memory->media && is_array($memory->media) 
-                        ? array_filter(array_map(function($item) {
-                            if (is_array($item) && isset($item['type']) && $item['type'] === 'image' && isset($item['url'])) {
-                                return $item['url'];
-                            }
-                            return null;
-                        }, $memory->media))
-                        : [],
-                    'videos' => $memory->media && is_array($memory->media) 
-                        ? array_filter(array_map(function($item) {
-                            if (is_array($item) && isset($item['type']) && $item['type'] === 'video' && isset($item['url'])) {
-                                return $item['url'];
-                            }
-                            return null;
-                        }, $memory->media))
-                        : [],
-                    'created_at' => $memory->created_at->toDateTimeString(),
-                    'likes' => $memory->likes,
-                    'user_liked' => $userLiked,
-                    'user_has_comment' => $userHasComment,
-                    'comments' => $comments,
-                    'views' => $memory->views,
+                    'id' => $comment->id,
+                    'author_id' => $comment->user->id,
+                    'author_name' => $comment->user->name,
+                    'author_avatar' => $comment->user->avatar ? \Storage::disk('s3')->url($comment->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&size=128&background=f3e5f5&color=7b1fa2&bold=true',
+                    'content' => $comment->content,
+                    'created_at' => $comment->created_at->toDateTimeString(),
+                    'likes' => $comment->likes ?? 0,
+                    'user_liked' => $commentLiked,
                 ];
             })->toArray();
             
-            // Проверяем связь текущего пользователя с мемориалом
-            $userRelationship = auth()->check() 
-                ? \App\Models\Relationship::where('memorial_id', $memorial->id)
-                    ->where('user_id', auth()->id())
-                    ->first()
-                : null;
+            // Проверяем, есть ли у пользователя комментарий к этому воспоминанию
+            $userHasComment = isset($userCommentMemories[$memory->id]);
             
-            // Собираем все медиа из воспоминаний
-            foreach ($memories as $memory) {
-                if (isset($memory['photos']) && is_array($memory['photos'])) {
-                    foreach ($memory['photos'] as $photo) {
-                        $allPhotos[] = [
-                            'url' => $photo,
-                            'memory_id' => $memory['id'],
-                            'author' => $memory['author_name'],
-                        ];
-                    }
-                }
-                if (isset($memory['videos']) && is_array($memory['videos'])) {
-                    foreach ($memory['videos'] as $video) {
-                        $allVideos[] = [
-                            'url' => $video,
-                            'memory_id' => $memory['id'],
-                            'author' => $memory['author_name'],
-                        ];
-                    }
+            return [
+                'id' => $memory->id,
+                'author_id' => $memory->user->id,
+                'author_name' => $memory->user->name,
+                'author_avatar' => $memory->user->avatar ? \Storage::disk('s3')->url($memory->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($memory->user->name) . '&size=128&background=e3f2fd&color=1976d2&bold=true',
+                'author_relationship' => $relationship ? $this->getRelationshipLabel($relationship) : null,
+                'content' => $memory->content,
+                'photos' => $memory->media && is_array($memory->media) 
+                    ? array_filter(array_map(function($item) {
+                        if (is_array($item) && isset($item['type']) && $item['type'] === 'image' && isset($item['url'])) {
+                            return $item['url'];
+                        }
+                        return null;
+                    }, $memory->media))
+                    : [],
+                'videos' => $memory->media && is_array($memory->media) 
+                    ? array_filter(array_map(function($item) {
+                        if (is_array($item) && isset($item['type']) && $item['type'] === 'video' && isset($item['url'])) {
+                            return $item['url'];
+                        }
+                        return null;
+                    }, $memory->media))
+                    : [],
+                'created_at' => $memory->created_at->toDateTimeString(),
+                'likes' => $memory->likes,
+                'user_liked' => $userLiked,
+                'user_has_comment' => $userHasComment,
+                'comments' => $comments,
+                'views' => $memory->views,
+            ];
+        })->toArray();
+        
+        // Проверяем связь текущего пользователя с мемориалом
+        $userRelationship = auth()->check() 
+            ? \App\Models\Relationship::where('memorial_id', $memorial->id)
+                ->where('user_id', auth()->id())
+                ->first()
+            : null;
+        
+        // Собираем все медиа из воспоминаний
+        foreach ($memories as $memory) {
+            if (isset($memory['photos']) && is_array($memory['photos'])) {
+                foreach ($memory['photos'] as $photo) {
+                    $allPhotos[] = [
+                        'url' => $photo,
+                        'memory_id' => $memory['id'],
+                        'author' => $memory['author_name'],
+                    ];
                 }
             }
-
-            // Добавляем медиа самого мемориала из вкладки "Медиа"
-            foreach (($memorial->media_photos ?? []) as $photoPath) {
-                if (!is_string($photoPath) || trim($photoPath) === '') {
-                    continue;
+            if (isset($memory['videos']) && is_array($memory['videos'])) {
+                foreach ($memory['videos'] as $video) {
+                    $allVideos[] = [
+                        'url' => $video,
+                        'memory_id' => $memory['id'],
+                        'author' => $memory['author_name'],
+                    ];
                 }
+            }
+        }
 
-                $allPhotos[] = [
-                    'url' => $this->toPublicMediaUrl($photoPath),
-                    'memory_id' => null,
-                    'author' => 'Галерея мемориала',
-                ];
+        // Добавляем медиа самого мемориала из вкладки "Медиа"
+        foreach (($memorial->media_photos ?? []) as $photoPath) {
+            if (!is_string($photoPath) || trim($photoPath) === '') {
+                continue;
             }
 
-            foreach (($memorial->media_videos ?? []) as $videoPath) {
-                if (!is_string($videoPath) || trim($videoPath) === '') {
-                    continue;
-                }
+            $allPhotos[] = [
+                'url' => $this->toPublicMediaUrl($photoPath),
+                'memory_id' => null,
+                'author' => 'Галерея мемориала',
+            ];
+        }
 
-                $allVideos[] = [
-                    'url' => $this->toPublicMediaUrl($videoPath),
-                    'memory_id' => null,
-                    'author' => 'Галерея мемориала',
-                ];
+        foreach (($memorial->media_videos ?? []) as $videoPath) {
+            if (!is_string($videoPath) || trim($videoPath) === '') {
+                continue;
             }
+
+            $allVideos[] = [
+                'url' => $this->toPublicMediaUrl($videoPath),
+                'memory_id' => null,
+                'author' => 'Галерея мемориала',
+            ];
         }
 
         $memorialGalleryPhotos = collect($allPhotos)
