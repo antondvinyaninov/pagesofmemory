@@ -50,6 +50,9 @@ class AppSetting extends Model
                 'maintenance_mode' => false,
                 'maintenance_message' => 'Сервис временно недоступен. Скоро вернемся.',
             ],
+            'analytics' => [
+                'gtm_id' => '',
+            ],
         ];
     }
 
@@ -76,5 +79,15 @@ class AppSetting extends Model
     public static function get(string $path, mixed $default = null): mixed
     {
         return data_get(self::current(), $path, $default);
+    }
+
+    /**
+     * Сохраняет отдельный путь настроек (например, analytics.gtm_id).
+     */
+    public static function set(string $path, mixed $value): void
+    {
+        $current = self::current();
+        data_set($current, $path, $value);
+        self::saveCurrent($current);
     }
 }

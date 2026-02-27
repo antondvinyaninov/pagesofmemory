@@ -1,6 +1,73 @@
 @extends('layouts.app')
 
-@section('title', $memorial->last_name . ' ' . $memorial->first_name . ' - Страница памяти')
+@php
+    $fullName = trim(implode(' ', array_filter([
+        $memorial->last_name,
+        $memorial->first_name,
+        $memorial->middle_name,
+    ])));
+
+    if ($fullName === '') {
+        $fullName = 'Страница памяти';
+    }
+
+    $birthYear = $memorial->birth_date?->format('Y');
+    $deathYear = $memorial->death_date?->format('Y');
+
+    $lifeRange = $birthYear || $deathYear
+        ? ($birthYear ?: '—') . ' — ' . ($deathYear ?: '—')
+        : null;
+
+    $descriptionPieces = [];
+
+    if ($memorial->biography) {
+        $descriptionPieces[] = $memorial->biography;
+    }
+
+    if ($lifeRange) {
+        $descriptionPieces[] = 'Годы жизни: ' . $lifeRange;
+    }
+
+    if ($memorial->birth_place) {
+        $descriptionPieces[] = 'Место рождения: ' . expand_region_abbreviations($memorial->birth_place);
+    }
+
+    $description = \Illuminate\Support\Str::limit(implode(' ', $descriptionPieces) ?: 'Страница памяти близкого человека.', 180);
+
+    $photoUrl = null;
+    if (!empty($memorial->photo)) {
+        $photoUrl = filter_var($memorial->photo, FILTER_VALIDATE_URL)
+            ? $memorial->photo
+            : s3_url($memorial->photo);
+    }
+
+    $structuredData = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Person',
+        'name' => $fullName,
+        'description' => $description,
+        'birthDate' => $memorial->birth_date?->toDateString(),
+        'deathDate' => $memorial->death_date?->toDateString(),
+        'image' => $photoUrl ?: null,
+        'url' => route('memorial.show', ['id' => $memorial->id]),
+    ];
+    // Убираем null-значения
+    $structuredData = array_filter($structuredData, fn ($value) => !is_null($value));
+@endphp
+
+@section('title', $fullName . ' - Страница памяти')
+@section('meta_title', $fullName . ' — страница памяти')
+@section('meta_description', $description)
+@section('meta_type', 'article')
+@if($photoUrl)
+    @section('meta_image', $photoUrl)
+@endif
+@section('meta')
+    <link rel="canonical" href="{{ route('memorial.show', ['id' => $memorial->id]) }}">
+    <script type="application/ld+json">
+        {!! json_encode($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+@endsection
 
 @section('content')
 <div class="min-h-screen bg-slate-100 pt-4 sm:pt-6" x-data="{ activeTab: 'memories' }">
