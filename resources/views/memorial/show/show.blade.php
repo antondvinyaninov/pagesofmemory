@@ -53,6 +53,25 @@
     ];
     // Убираем null-значения
     $structuredData = array_filter($structuredData, fn ($value) => !is_null($value));
+
+    $breadcrumbsData = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => 'Главная',
+                'item' => url('/'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => $fullName,
+                'item' => route('memorial.show', ['id' => $memorial->id]),
+            ],
+        ],
+    ];
 @endphp
 
 @section('title', $fullName . ' - Страница памяти')
@@ -66,6 +85,9 @@
     <link rel="canonical" href="{{ route('memorial.show', ['id' => $memorial->id]) }}">
     <script type="application/ld+json">
         {!! json_encode($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode($breadcrumbsData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
 @endsection
 
