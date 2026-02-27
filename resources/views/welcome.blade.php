@@ -210,7 +210,7 @@
                         Здесь отображаются недавно созданные или обновлённые страницы памяти. Используйте поиск выше, чтобы быстро найти нужного человека.
                     </p>
 
-                    @if(($recentMemorials ?? collect())->count() > 0)
+                    @if(isset($recentMemorials) && $recentMemorials->count() > 0)
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                             @foreach($recentMemorials as $memorial)
                                 @php
