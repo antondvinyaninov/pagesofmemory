@@ -28,7 +28,7 @@
                     type="text" 
                     name="gtm_id" 
                     id="gtm_id"
-                    value="{{ old('gtm_id', AppSetting::get('analytics.gtm_id', '')) }}"
+                    value="{{ old('gtm_id', \App\Models\AppSetting::get('analytics.gtm_id', '')) }}"
                     placeholder="GTM-XXXXXXX"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
