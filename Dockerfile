@@ -43,6 +43,9 @@ WORKDIR /var/www
 # Copy application
 COPY . /var/www
 
+# Entrypoint
+RUN chmod +x /var/www/docker/entrypoint.sh
+
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
@@ -96,4 +99,7 @@ RUN chown -R www-data:www-data /var/www \
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS http://127.0.0.1/ >/dev/null || exit 1
+
+CMD ["/var/www/docker/entrypoint.sh"]
