@@ -6,19 +6,20 @@
 @section('meta_type', 'website')
 @section('meta')
     <link rel="canonical" href="{{ url('/') }}">
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "{{ project_site_name() }}",
-            "url": "{{ url('/') }}",
-            "potentialAction": {
-                "@type": "SearchAction",
-                "target": "{{ url('/?q=') }}{search_term_string}",
-                "query-input": "required name=search_term_string"
-            }
-        }
-    </script>
+    @php
+        $webSiteJsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => project_site_name(),
+            'url' => url('/'),
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => url('/') . '/?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($webSiteJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endsection
 
 @section('content')
