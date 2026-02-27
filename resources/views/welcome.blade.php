@@ -1,6 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Главная - Страницы памяти')
+@section('title', 'Страницы памяти — цифровые страницы памяти о близких')
+@section('meta_title', 'Страницы памяти — сервис цифровых памятных страниц о близких')
+@section('meta_description', 'Создайте онлайн-страницу памяти близкого человека: фотографии, биография, воспоминания родных и друзей на одном сайте. Доступ для всей семьи из любой точки мира.')
+@section('meta_type', 'website')
+@section('meta')
+    <link rel="canonical" href="{{ url('/') }}">
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "{{ project_site_name() }}",
+            "url": "{{ url('/') }}",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "{{ url('/?q=') }}{search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    </script>
+@endsection
 
 @section('content')
 <div class="bg-gray-200">
